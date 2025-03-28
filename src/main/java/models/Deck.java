@@ -15,29 +15,25 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "app_user")
-public class User {
+public class Deck {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    public String username;
-    public String email;
-    public String password;
-    public Boolean active;
+    public String name;
     public LocalDate createdDate;
-    public Double balance;
+    public Integer postition;
+    public Boolean active;
 
-    @OneToMany(mappedBy = "user")
-    public List<Card> cards = new ArrayList<>();
+    @ManyToOne
+    public User user;
 
-    @OneToMany(mappedBy = "user")
-    public List<Deck> decks = new ArrayList<>();
+    @OneToMany(mappedBy = "deck")
+    public List<DeckCard> cards = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
-        setActive(true);
         setCreatedDate(LocalDate.now());
-        setBalance(20.0);
+        setPostition(1);
     }
 }

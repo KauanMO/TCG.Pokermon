@@ -44,6 +44,9 @@ public class Card {
     @OneToMany(mappedBy = "card")
     public List<CardSubtype> subtypes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "card")
+    public List<DeckCard> decks = new ArrayList<>();
+
     @PrePersist
     public void prePersist() {
         setCreatedDate(LocalDate.now());
