@@ -1,6 +1,5 @@
 package services;
 
-import enums.CardRarity;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import rest.clients.CardsRestClient;

@@ -1,6 +1,9 @@
 package enums;
 
-public enum CardRarity {
+import lombok.Getter;
+
+@Getter
+public enum CardRarityEnum {
     COMMON(30),
     UNCOMMON(20),
     RARE(15),
@@ -26,11 +29,8 @@ public enum CardRarity {
 
     private final int weight;
 
-    CardRarity(int weight) {
+    CardRarityEnum(int weight) {
         this.weight = weight;
     }
 
-    public int getWeight() {
-        return weight;
-    }
 }
