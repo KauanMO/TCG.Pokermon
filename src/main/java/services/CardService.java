@@ -14,7 +14,7 @@ public class CardService {
     CardsRestClient cardsRestClient;
 
     public Set<ExternalCardDTO> getCardsByName(String name) {
-        ExternalCardResponseDTO externalResponse = cardsRestClient.getByName("name:camerupt", "id,name,images,rarity,set,prices");
+        ExternalCardResponseDTO externalResponse = cardsRestClient.getByName("name:" + name, "id,name,images,rarity,set,prices");
 
         return externalResponse.data();
     }
