@@ -15,5 +15,13 @@ import java.util.Set;
 public interface CardsRestClient {
     @GET
     @ClientHeaderParam(name = "X-Api-Key", value = "${external-api.key}")
-    ExternalCardResponseDTO getByName(@QueryParam("q") String query, @QueryParam("select") String select);
+    ExternalCardResponseDTO get(@QueryParam("q") String query, @QueryParam("select") String select);
+
+    @GET
+    @ClientHeaderParam(name = "X-Api-Key", value = "${external-api.key}")
+    ExternalCardResponseDTO get(@QueryParam("q") String query, @QueryParam("select") String select, @QueryParam("pageSize") Integer pageSize);
+
+    @GET
+    @ClientHeaderParam(name = "X-Api-Key", value = "${external-api.key}")
+    ExternalCardResponseDTO get(@QueryParam("q") String query, @QueryParam("select") String select, @QueryParam("pageSize") Integer pageSize, @QueryParam("page") Integer page);
 }

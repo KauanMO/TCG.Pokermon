@@ -18,4 +18,12 @@ public class CardResource {
 
         return Response.ok(cards).build();
     }
+
+    @GET
+    @Path("random")
+    public Response getRandomCard(@QueryParam("rarity") String rarity) {
+        var card = service.getRandomCard(rarity);
+
+        return Response.ok(card).build();
+    }
 }
