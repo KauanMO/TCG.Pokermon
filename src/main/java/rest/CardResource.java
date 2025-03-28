@@ -1,0 +1,21 @@
+package rest;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
+import services.CardService;
+
+@Path("cards")
+public class CardResource {
+    @Inject
+    private CardService service;
+
+    @GET
+    public Response getByName(@QueryParam("name") String name) {
+        var cards = service.getCardsByName(name);
+
+        return Response.ok(cards).build();
+    }
+}
