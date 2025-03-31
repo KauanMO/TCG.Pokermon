@@ -9,10 +9,11 @@ public record ExternalCardDTO(
     String name,
     String rarity,
     String flavorText,
+    List<String> types,
+    List<String> subtypes,
     ExternalCardImagesDTO images,
     ExternalSetDTO set,
-    CardMarket cardmarket,
-    List<String> types
+    CardMarket cardmarket
 ) {
     public record CardMarket (Prices prices) { }
 

@@ -32,5 +32,4 @@ public enum CardRarityEnum {
     CardRarityEnum(int weight) {
         this.weight = weight;
     }
-
 }

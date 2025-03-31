@@ -10,7 +10,7 @@ import java.util.Optional;
 public class CardSetRepository implements PanacheRepository<CardSet> {
     public Optional<CardSet> findByExternalId(String externalId) {
         return this
-                .find("externalid = ?1", externalId)
+                .find("externalId = ?1", externalId)
                 .stream()
                 .findAny();
     }

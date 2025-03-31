@@ -31,5 +31,7 @@ public class CardSetService {
         CardSet cardSetFound = repository.findByExternalId(externalSetId).orElseThrow(CardSetNotFound::new);
 
         if (user.getBalance() < cardSetFound.getPrice()) throw new NoBalanceEnoughException();
+
+        userService.updateUserBalance(user, user.getBalance() - cardSetFound.getPrice());
     }
 }

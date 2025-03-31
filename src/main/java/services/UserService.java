@@ -32,4 +32,11 @@ public class UserService {
 
         return Optional.of(userFound);
     }
+
+    @Transactional
+    public void updateUserBalance(User user, Double newBalance) {
+        user.setBalance(newBalance);
+
+        repository.persist(user);
+    }
 }
