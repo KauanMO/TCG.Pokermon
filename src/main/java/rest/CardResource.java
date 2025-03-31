@@ -2,6 +2,7 @@ package rest;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
@@ -25,5 +26,13 @@ public class CardResource {
         var card = service.getRandomCard(rarity);
 
         return Response.ok(card).build();
+    }
+
+    @POST
+    @Path("open-set/{setExternalId}/{userId}")
+    public Response openSet(String setExternalId, Long userId) {
+        service.openCardSet(setExternalId, userId);
+
+        return Response.ok().build();
     }
 }

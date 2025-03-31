@@ -7,6 +7,8 @@ import models.User;
 import repositories.UserRepository;
 import rest.dtos.user.CreateUserDTO;
 
+import java.util.Optional;
+
 @ApplicationScoped
 public class UserService {
     @Inject
@@ -23,5 +25,11 @@ public class UserService {
         repository.persist(newUser);
 
         return newUser;
+    }
+
+    public Optional<User> findUserById(Long userId) {
+        User userFound = repository.findById(userId);
+
+        return Optional.of(userFound);
     }
 }

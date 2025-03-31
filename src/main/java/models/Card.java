@@ -32,7 +32,7 @@ public class Card {
     public String setId;
 
     public Double price;
-    public Integer quality;
+    public Float quality;
     public LocalDate createdDate;
 
     @ManyToOne
