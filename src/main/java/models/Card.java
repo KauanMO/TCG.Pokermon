@@ -50,7 +50,6 @@ public class Card {
 
     @PrePersist
     public void prePersist() {
-        setPrice();
         setCreatedDate(LocalDate.now());
     }
 }
