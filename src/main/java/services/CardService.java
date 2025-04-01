@@ -116,18 +116,18 @@ public class CardService {
 
         ExternalCardDTO externalCard = getRandomCardSetCard(externalSetId);
 
+        var quality = Math.round((Math.random() * 2) * 1000.0) / 1000.0;
+
         Card newCard = Card.builder()
                 .name(externalCard.name())
-                .price(externalCard.cardmarket().prices().averageSellPrice())
+                .price(externalCard.cardmarket().prices().averageSellPrice() * quality)
                 .largeImage(externalCard.images().large())
                 .smallImage(externalCard.images().small())
                 .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(externalCard.rarity())))
                 .user(userFound)
                 .descripton(externalCard.flavorText())
                 .externalCode(externalCard.id())
-                .quality(
-                        Math.round((Math.random() * 2) * 1000.0) / 1000.0
-                )
+                .quality(quality)
                 .evolvesFrom(externalCard.evolvesFrom())
                 .setName(externalCard.set().name())
                 .setId(externalCard.set().id())
