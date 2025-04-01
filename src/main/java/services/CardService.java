@@ -77,9 +77,11 @@ public class CardService {
     private ExternalCardDTO getRandomCardSetCard(String externalSetId) {
         Random random = new Random();
 
-        String queryRarity = "\"" + CardRarityPicker.pickRarity().name().replace("_", " ") + "\"";
+        String queryRarity = StringHelper.generateRarityToQuery();
 
         Integer externalResponseTotal = getExternalTotalCards(queryRarity, externalSetId);
+
+        if (externalResponseTotal < 1) return getRandomCardSetCard(externalSetId);
 
         Integer randomCardPosition = random.nextInt(externalResponseTotal + 1);
 
@@ -173,7 +175,7 @@ public class CardService {
     public Card findCardById(Long id) {
         Card cardFound = repository.findById(id);
 
-        if(cardFound == null) throw new CardNotFoundException(id);
+        if (cardFound == null) throw new CardNotFoundException(id);
 
         return cardFound;
     }
