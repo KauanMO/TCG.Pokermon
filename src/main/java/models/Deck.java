@@ -34,6 +34,6 @@ public class Deck {
     @PrePersist
     public void prePersist() {
         setCreatedDate(LocalDate.now());
-        setPostition(1);
+        setActive(true);
     }
 }
