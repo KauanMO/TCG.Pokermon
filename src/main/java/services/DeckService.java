@@ -7,6 +7,7 @@ import models.Deck;
 import models.User;
 import repositories.DeckRepository;
 import rest.dtos.deck.CreateDeckDTO;
+import services.exceptions.DeckNotFoundException;
 import services.exceptions.UserNotFoundException;
 
 @ApplicationScoped
@@ -30,5 +31,21 @@ public class DeckService {
         repository.persist(newDeck);
 
         return newDeck;
+    }
+
+    public Deck findById(Long id) {
+        Deck deckFound = repository.findById(id);
+
+        if (deckFound == null) throw new DeckNotFoundException(id);
+
+        return deckFound;
+    }
+
+    public Deck findByIdUserId(Long id, Long userId) {
+        Deck deckFound = repository.findByIdAndUserId(id, userId).orElseThrow(
+                () -> new DeckNotFoundException("Deck not found or is not your deck")
+        );
+
+        return deckFound;
     }
 }

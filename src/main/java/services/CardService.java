@@ -18,6 +18,7 @@ import rest.clients.CardsRestClient;
 import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.card.OpenedCardDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
+import services.exceptions.CardNotFoundException;
 import services.exceptions.UserNotFoundException;
 import utils.CardRarityPicker;
 import utils.StringHelper;
@@ -167,5 +168,17 @@ public class CardService {
         }
 
         cardSubtypeRepository.persist(cardSubtypes);
+    }
+
+    public Card findCardById(Long id) {
+        Card cardFound = repository.findById(id);
+
+        if(cardFound == null) throw new CardNotFoundException(id);
+
+        return cardFound;
+    }
+
+    public List<Card> findCardsByIds(List<Long> ids) {
+        return repository.list("id in ?1", ids);
     }
 }
