@@ -45,7 +45,7 @@ public class CardService {
     @Inject
     private CardSubtypeRepository cardSubtypeRepository;
 
-    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText";
+    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText,evolvesFrom";
 
     public Set<ExternalCardDTO> getCardsByName(String name) {
         ExternalCardResponseDTO externalResponse = cardsRestClient.get("name:" + name, defaultSelectFilds);
@@ -128,6 +128,7 @@ public class CardService {
                 .quality(
                         Math.round((Math.random() * 2) * 1000.0) / 1000.0
                 )
+                .evolvesFrom(externalCard.evolvesFrom())
                 .setName(externalCard.set().name())
                 .setId(externalCard.set().id())
                 .build();

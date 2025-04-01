@@ -27,6 +27,7 @@ public class Card {
     public String smallImage;
     public String largeImage;
     public String descripton;
+    public String evolvesFrom;
 
     public String setName;
     public String setId;
