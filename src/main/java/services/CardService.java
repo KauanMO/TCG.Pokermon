@@ -1,24 +1,28 @@
 package services;
 
 import enums.CardRarityEnum;
+import enums.CardSubtypeEnum;
 import enums.CardTypeEnum;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import models.Card;
+import models.CardSubtype;
 import models.CardType;
 import models.User;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardRepository;
+import repositories.CardSubtypeRepository;
+import repositories.CardTypeRepository;
 import rest.clients.CardsRestClient;
 import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.card.OpenedCardDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
 import services.exceptions.UserNotFoundException;
 import utils.CardRarityPicker;
+import utils.StringHelper;
 
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @ApplicationScoped
 public class CardService {
@@ -34,7 +38,13 @@ public class CardService {
     @Inject
     private UserService userService;
 
-    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,,subtypes,types";
+    @Inject
+    private CardTypeRepository cardTypeRepository;
+
+    @Inject
+    private CardSubtypeRepository cardSubtypeRepository;
+
+    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText";
 
     public Set<ExternalCardDTO> getCardsByName(String name) {
         ExternalCardResponseDTO externalResponse = cardsRestClient.get("name:" + name, defaultSelectFilds);
@@ -68,7 +78,7 @@ public class CardService {
 
         String queryRarity = "\"" + CardRarityPicker.pickRarity().name().replace("_", " ") + "\"";
 
-        Integer externalResponseTotal = getExternalTotalCards(queryRarity);
+        Integer externalResponseTotal = getExternalTotalCards(queryRarity, externalSetId);
 
         Integer randomCardPosition = random.nextInt(externalResponseTotal + 1);
 
@@ -85,11 +95,18 @@ public class CardService {
 
     private Integer getExternalTotalCards(String queryRarity) {
         return cardsRestClient
-                .get("rarity:" + queryRarity, "id", 1)
+                .get("rarity:" + queryRarity + " supertype:pokemon", "id", 1)
                 .totalCount();
     }
 
-    public OpenedCardDTO openCardSet(String externalSetId, Long userId) {
+    private Integer getExternalTotalCards(String queryRarity, String externalSetId) {
+        return cardsRestClient
+                .get("rarity:" + queryRarity + " set.id:" + externalSetId + " supertype:pokemon", "id", 1)
+                .totalCount();
+    }
+
+    @Transactional
+    public Card openCardSet(String externalSetId, Long userId) {
         User userFound = userService.findUserById(userId).orElseThrow(UserNotFoundException::new);
 
         cardSetService.verifyCardSet(userFound, externalSetId);
@@ -101,14 +118,12 @@ public class CardService {
                 .price(externalCard.cardmarket().prices().averageSellPrice())
                 .largeImage(externalCard.images().large())
                 .smallImage(externalCard.images().small())
-                .rarity(CardRarityEnum.valueOf(externalCard.rarity()))
+                .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(externalCard.rarity())))
                 .user(userFound)
                 .descripton(externalCard.flavorText())
                 .externalCode(externalCard.id())
                 .quality(
-                        (float) Math.round(
-                                Math.random() * 2
-                        * 1000 / 1000.0)
+                        Math.round((Math.random() * 2) * 1000.0) / 1000.0
                 )
                 .setName(externalCard.set().name())
                 .setId(externalCard.set().id())
@@ -116,8 +131,41 @@ public class CardService {
 
         repository.persist(newCard);
 
+        registerCardType(newCard, externalCard.types());
+        registerCardSubtype(newCard, externalCard.subtypes());
 
+        return newCard;
+    }
 
-        return null;
+    @Transactional
+    public void registerCardType(Card card, List<String> types) {
+        List<CardType> cardTypes = new ArrayList<>();
+
+        for (String type : types) {
+            cardTypes.add(
+                    CardType.builder()
+                            .type(CardTypeEnum.valueOf(StringHelper.enumStringBuilder(type)))
+                            .card(card)
+                            .build()
+            );
+        }
+
+        cardTypeRepository.persist(cardTypes);
+    }
+
+    @Transactional
+    public void registerCardSubtype(Card card, List<String> subtypes) {
+        List<CardSubtype> cardSubtypes = new ArrayList<>();
+
+        for (String type : subtypes) {
+            cardSubtypes.add(
+                    CardSubtype.builder()
+                            .subtype(CardSubtypeEnum.valueOf(StringHelper.enumStringBuilder(type)))
+                            .card(card)
+                            .build()
+            );
+        }
+
+        cardSubtypeRepository.persist(cardSubtypes);
     }
 }

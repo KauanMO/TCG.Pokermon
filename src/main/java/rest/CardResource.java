@@ -6,6 +6,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
+import rest.dtos.card.OpenedCardDTO;
 import services.CardService;
 
 @Path("cards")
@@ -31,8 +32,10 @@ public class CardResource {
     @POST
     @Path("open-set/{setExternalId}/{userId}")
     public Response openSet(String setExternalId, Long userId) {
-        service.openCardSet(setExternalId, userId);
+        var openedCard = service.openCardSet(setExternalId, userId);
 
-        return Response.ok().build();
+        return Response
+                .ok(new OpenedCardDTO(openedCard))
+                .build();
     }
 }
