@@ -5,6 +5,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import rest.dtos.user.CreateUserDTO;
+import rest.dtos.user.LoginDTO;
 import rest.dtos.user.OutUserDTO;
 import services.UserService;
 
@@ -19,6 +20,16 @@ public class UserResource {
 
         return Response
                 .ok(new OutUserDTO(newUser))
+                .build();
+    }
+
+    @POST
+    @Path("login")
+    public Response login(LoginDTO dto) {
+        var userFound = service.login(dto);
+
+        return Response
+                .ok(new OutUserDTO(userFound))
                 .build();
     }
 }
