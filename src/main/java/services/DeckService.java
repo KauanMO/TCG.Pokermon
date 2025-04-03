@@ -42,10 +42,12 @@ public class DeckService {
     }
 
     public Deck findByIdUserId(Long id, Long userId) {
-        Deck deckFound = repository.findByIdAndUserId(id, userId).orElseThrow(
+        return repository.findByIdAndUserId(id, userId).orElseThrow(
                 () -> new DeckNotFoundException("Deck not found or is not your deck")
         );
+    }
 
-        return deckFound;
+    public Deck findActiveUserDeck(Long userId) {
+        return repository.find("active = true and user.id = ?1", userId).firstResult();
     }
 }

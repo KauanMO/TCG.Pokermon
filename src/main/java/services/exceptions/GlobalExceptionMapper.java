@@ -1,6 +1,7 @@
 package services.exceptions;
 
 import jakarta.ws.rs.core.Response;
+import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 public class GlobalExceptionMapper {
@@ -24,6 +25,16 @@ public class GlobalExceptionMapper {
     public Response exception(NoBalanceEnoughException e) {
         return Response
                 .status(400)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(ClientWebApplicationException e) {
+        System.out.println(e.getMessage());
+
+        return Response
+                .status(500)
                 .entity(e.getMessage())
                 .build();
     }

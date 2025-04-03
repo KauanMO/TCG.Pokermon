@@ -45,7 +45,7 @@ public class CardService {
     @Inject
     private CardSubtypeRepository cardSubtypeRepository;
 
-    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText";
+    private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText,evolvesFrom";
 
     public Set<ExternalCardDTO> getCardsByName(String name) {
         ExternalCardResponseDTO externalResponse = cardsRestClient.get("name:" + name, defaultSelectFilds);
@@ -77,9 +77,11 @@ public class CardService {
     private ExternalCardDTO getRandomCardSetCard(String externalSetId) {
         Random random = new Random();
 
-        String queryRarity = "\"" + CardRarityPicker.pickRarity().name().replace("_", " ") + "\"";
+        String queryRarity = StringHelper.generateRarityToQuery();
 
         Integer externalResponseTotal = getExternalTotalCards(queryRarity, externalSetId);
+
+        if (externalResponseTotal < 1) return getRandomCardSetCard(externalSetId);
 
         Integer randomCardPosition = random.nextInt(externalResponseTotal + 1);
 
@@ -114,18 +116,19 @@ public class CardService {
 
         ExternalCardDTO externalCard = getRandomCardSetCard(externalSetId);
 
+        var quality = Math.round((Math.random() * 2) * 1000.0) / 1000.0;
+
         Card newCard = Card.builder()
                 .name(externalCard.name())
-                .price(externalCard.cardmarket().prices().averageSellPrice())
+                .price(externalCard.cardmarket().prices().averageSellPrice() * quality)
                 .largeImage(externalCard.images().large())
                 .smallImage(externalCard.images().small())
                 .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(externalCard.rarity())))
                 .user(userFound)
                 .descripton(externalCard.flavorText())
                 .externalCode(externalCard.id())
-                .quality(
-                        Math.round((Math.random() * 2) * 1000.0) / 1000.0
-                )
+                .quality(quality)
+                .evolvesFrom(externalCard.evolvesFrom())
                 .setName(externalCard.set().name())
                 .setId(externalCard.set().id())
                 .build();
@@ -173,7 +176,7 @@ public class CardService {
     public Card findCardById(Long id) {
         Card cardFound = repository.findById(id);
 
-        if(cardFound == null) throw new CardNotFoundException(id);
+        if (cardFound == null) throw new CardNotFoundException(id);
 
         return cardFound;
     }

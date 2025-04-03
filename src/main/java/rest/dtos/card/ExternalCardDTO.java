@@ -11,6 +11,7 @@ public record ExternalCardDTO(
     String flavorText,
     List<String> types,
     List<String> subtypes,
+    String evolvesFrom,
     ExternalCardImagesDTO images,
     ExternalSetDTO set,
     CardMarket cardmarket
