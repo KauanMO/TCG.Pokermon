@@ -13,6 +13,10 @@ public record SocketMessageDTO(
         List<OutCardDTO> cards,
         ManagedUserDTO nextPlayer
 ) {
+    public SocketMessageDTO(SocketMessageTypeEnum type, ManagedUserDTO user, ManagedUserDTO nextPlayer) {
+        this(type, user, null, null, null, nextPlayer);
+    }
+
     public SocketMessageDTO(SocketMessageTypeEnum type, ManagedUserDTO user, Set<ManagedUserDTO> players) {
         this(type, user, null, players.stream().map(ManagedUserDTO::username).toList(), null, null);
     }

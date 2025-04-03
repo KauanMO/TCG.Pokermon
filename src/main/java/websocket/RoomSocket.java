@@ -4,11 +4,7 @@ import io.quarkus.websockets.next.*;
 import io.vertx.core.json.Json;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import models.Card;
-import models.Deck;
 import models.User;
-import services.CardService;
-import services.DeckService;
 import services.UserService;
 import services.exceptions.UserNotFoundException;
 import websocket.dto.BettedCardsDTO;
@@ -17,6 +13,7 @@ import websocket.dto.OutCardDTO;
 import websocket.dto.SocketMessageDTO;
 import websocket.enums.SocketMessageTypeEnum;
 import websocket.exceptions.BettedCardsValueNotEnoughException;
+import websocket.exceptions.CardNotInDeckException;
 import websocket.exceptions.WrongUserTurnException;
 
 import java.util.*;
@@ -35,7 +32,7 @@ public class RoomSocket {
     @Inject
     private OpenConnections openConnections;
 
-    private Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
+    private final Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
 
     @Transactional
     @OnOpen(broadcast = true)
@@ -71,11 +68,11 @@ public class RoomSocket {
         SocketMessageDTO message = Json.decodeValue(stringMessage, SocketMessageDTO.class);
 
         switch (message.type()) {
-            case SocketMessageTypeEnum.CONFIRM_READY -> {
+            case SocketMessageTypeEnum.READY -> {
                 return onConfirmReadyMessage(userFound);
             }
 
-            case SocketMessageTypeEnum.BET_CARD -> {
+            case SocketMessageTypeEnum.CARD_BET -> {
                 return onBetCardMessage(message
                                 .cards().stream()
                                 .map(OutCardDTO::id)
@@ -83,8 +80,20 @@ public class RoomSocket {
                         userFound);
             }
 
-            default -> {
+            case SocketMessageTypeEnum.CARD_TRADE -> {
+                return onCardTrade(message.cards().stream().
+                        map(OutCardDTO::id)
+                        .toList(), userFound);
+            }
+
+            case SocketMessageTypeEnum.VIEW_HAND -> {
+                onViewHand(userFound);
+
                 return null;
+            }
+
+            default -> {
+                return new SocketMessageDTO(SocketMessageTypeEnum.ERROR);
             }
         }
     }
@@ -94,7 +103,7 @@ public class RoomSocket {
 
         if (!readyPlayers.containsValue(false) && readyPlayers.size() > 1) roundManager.startRound(readyPlayers);
 
-        return new SocketMessageDTO(SocketMessageTypeEnum.CONFIRM_READY,
+        return new SocketMessageDTO(SocketMessageTypeEnum.READY,
                 new ManagedUserDTO(userFound, connection.id()),
                 readyPlayers.keySet());
     }
@@ -103,7 +112,7 @@ public class RoomSocket {
         try {
             BettedCardsDTO bettedCards = roundManager.betCard(cardsIds, userFound);
 
-            return new SocketMessageDTO(SocketMessageTypeEnum.BET_CARD,
+            return new SocketMessageDTO(SocketMessageTypeEnum.CARD_BET,
                     new ManagedUserDTO(userFound, connection.id()),
                     new ArrayList<>(bettedCards
                             .cards().stream()
@@ -114,5 +123,22 @@ public class RoomSocket {
             return new SocketMessageDTO(SocketMessageTypeEnum.ERROR,
                     e.getMessage());
         }
+    }
+
+    private SocketMessageDTO onCardTrade(List<Long> cardsIds, User userFound) {
+        try {
+            ManagedUserDTO nextPlayer = roundManager.tradeCard(cardsIds, userFound);
+
+            return new SocketMessageDTO(SocketMessageTypeEnum.CARD_TRADE,
+                    new ManagedUserDTO(userFound, connection.id()),
+                    nextPlayer);
+        } catch (CardNotInDeckException e) {
+            return new SocketMessageDTO(SocketMessageTypeEnum.ERROR,
+                    e.getMessage());
+        }
+    }
+
+    private void onViewHand(User userFound) {
+        roundManager.viewHand(userFound);
     }
 }

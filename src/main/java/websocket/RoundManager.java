@@ -15,10 +15,10 @@ import websocket.dto.OutCardDTO;
 import websocket.dto.SocketMessageDTO;
 import websocket.enums.SocketMessageTypeEnum;
 import websocket.exceptions.BettedCardsValueNotEnoughException;
+import websocket.exceptions.MoreThanOneCardChangeException;
 import websocket.exceptions.WrongUserTurnException;
 
 import java.util.*;
-import java.util.stream.DoubleStream;
 
 @ApplicationScoped
 public class RoundManager {
@@ -32,9 +32,17 @@ public class RoundManager {
     private WebSocketConnection connection;
 
     private final Map<ManagedUserDTO, Stack<OutCardDTO>> decksByUsers = new HashMap<>();
+    private final Map<ManagedUserDTO, List<OutCardDTO>> handsByUsers = new HashMap<>();
     private Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
     private final Queue<ManagedUserDTO> playersQueue = new LinkedList<>();
     private Map<ManagedUserDTO, List<OutCardDTO>> cardBank;
+    private Map<CurrentQueueSpin, Integer> spinCount = Map.of(
+            CurrentQueueSpin.CHANGING, 0
+    );
+
+    public enum CurrentQueueSpin {
+        CHANGING
+    }
 
     public void startRound(Map<ManagedUserDTO, Boolean> readyPlayers) {
         this.readyPlayers = readyPlayers;
@@ -42,7 +50,7 @@ public class RoundManager {
 
         resetPlayersQueue();
         buyFirstCards();
-        requestFirstBet();
+        sendRequest(SocketMessageTypeEnum.REQUEST_CARD_BET);
     }
 
     public BettedCardsDTO betCard(List<Long> cardsIds, User user) {
@@ -69,9 +77,58 @@ public class RoundManager {
                 .map(OutCardDTO::new)
                 .toList());
 
-        playersQueue.poll();
+        popPlayersQueue(SocketMessageTypeEnum.REQUEST_CARD_TRADE);
 
         return new BettedCardsDTO(cards, playersQueue.peek());
+    }
+
+    public ManagedUserDTO tradeCard(List<Long> cardsIds, User user) {
+        if (cardsIds.size() > 1) throw new MoreThanOneCardChangeException();
+
+        ManagedUserDTO currentUser = playersQueue.peek();
+
+        if(!user.getId().equals(currentUser.id())) throw new WrongUserTurnException();
+
+        OutCardDTO card = handsByUsers.get(currentUser)
+                .stream().filter(c -> c
+                        .id()
+                        .equals(cardsIds.getFirst()))
+                .findFirst()
+                .orElseThrow();
+
+        handsByUsers.get(currentUser).remove(card);
+
+        buyCards(1, currentUser);
+
+        broadcastSingleConnection(currentUser, new SocketMessageDTO(
+                SocketMessageTypeEnum.VIEW_HAND,
+                handsByUsers.get(currentUser)
+        ));
+
+        popPlayersQueue(SocketMessageTypeEnum.REQUEST_CARD_BET);
+
+        return playersQueue.peek();
+    }
+
+    public void viewHand(User user) {
+        ManagedUserDTO currentUser = new ManagedUserDTO(user, connection.id());
+
+        List<OutCardDTO> cards = handsByUsers.get(currentUser);
+
+        broadcastSingleConnection(currentUser, new SocketMessageDTO(
+                SocketMessageTypeEnum.VIEW_HAND,
+                cards
+        ));
+    }
+
+    private void popPlayersQueue(SocketMessageTypeEnum nextSpinRequest) {
+        playersQueue.poll();
+
+        if (playersQueue.peek() == null) {
+            resetPlayersQueue();
+
+            sendRequest(nextSpinRequest);
+        }
     }
 
     private Double calculateCardBankValue() {
@@ -97,18 +154,25 @@ public class RoundManager {
     private void buyFirstCards() {
         for (ManagedUserDTO userDTO : readyPlayers.keySet()) {
             decksByUsers.put(userDTO, getDeck(userDTO.id()));
+            handsByUsers.put(userDTO, new ArrayList<>());
 
-            List<OutCardDTO> cards = List.of(
-                    decksByUsers.get(userDTO).pop(),
-                    decksByUsers.get(userDTO).pop(),
-                    decksByUsers.get(userDTO).pop()
-            );
+            buyCards(3, userDTO);
 
-            openConnections.findByConnectionId(userDTO.connectionId())
-                    .ifPresentOrElse(c -> c.sendTextAndAwait(cards),
-                            () -> {
-                            });
+            broadcastSingleConnection(userDTO, new SocketMessageDTO(
+                    SocketMessageTypeEnum.VIEW_HAND,
+                    handsByUsers.get(userDTO)
+            ));
         }
+    }
+
+    private void broadcastSingleConnection(ManagedUserDTO user, SocketMessageDTO message) {
+        openConnections.findByConnectionId(user.connectionId())
+                .ifPresentOrElse(c -> c.sendTextAndAwait(message), () -> {
+                });
+    }
+
+    private void buyCards(Integer amount, ManagedUserDTO user) {
+        for (int i = 0; i < amount; i++) handsByUsers.get(user).add(decksByUsers.get(user).pop());
     }
 
     private Stack<OutCardDTO> getDeck(Long userId) {
@@ -128,10 +192,10 @@ public class RoundManager {
         return playingDeck;
     }
 
-    private void requestFirstBet() {
+    private void sendRequest(SocketMessageTypeEnum requestType) {
         connection.broadcast()
                 .sendTextAndAwait(new SocketMessageDTO(
-                        SocketMessageTypeEnum.REQUEST_BET,
+                        requestType,
                         playersQueue.peek(),
                         new HashSet<>(playersQueue)
                 ));
