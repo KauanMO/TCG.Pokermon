@@ -1,13 +1,11 @@
 package websocket;
 
 import io.quarkus.websockets.next.*;
-import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import models.Card;
 import models.Deck;
-import models.DeckCard;
 import models.User;
 import services.CardService;
 import services.DeckService;
@@ -32,14 +30,12 @@ public class RoomSocket {
     private CardService cardService;
 
     @Inject
-    private DeckService deckService;
+    private RoundManager roundManager;
 
     @Inject
     OpenConnections openConnections;
 
     Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
-
-    Map<ManagedUserDTO, Stack<Card>> decksByUsers = new HashMap<>();
 
     @Transactional
     @OnOpen(broadcast = true)
@@ -48,9 +44,9 @@ public class RoomSocket {
                 .findUserById(Long.valueOf(connection.pathParam("userId")))
                 .orElseThrow(UserNotFoundException::new);
 
-        readyPlayers.put(new ManagedUserDTO(userFound), false);
+        readyPlayers.put(new ManagedUserDTO(userFound, connection.id()), false);
 
-        return new SocketMessageDTO(SocketMessageTypeEnum.USER_JOINED, new ManagedUserDTO(userFound), readyPlayers.keySet());
+        return new SocketMessageDTO(SocketMessageTypeEnum.USER_JOINED, new ManagedUserDTO(userFound, connection.id()), readyPlayers.keySet());
     }
 
     @Transactional
@@ -61,7 +57,7 @@ public class RoomSocket {
                 .orElseThrow(UserNotFoundException::new);
 
         connection.broadcast().sendTextAndAwait(new SocketMessageDTO(SocketMessageTypeEnum.USER_LEFT,
-                new ManagedUserDTO(userFound),
+                new ManagedUserDTO(userFound, connection.id()),
                 readyPlayers.keySet()));
     }
 
@@ -77,63 +73,19 @@ public class RoomSocket {
         if (message.type().equals(SocketMessageTypeEnum.CONFIRM_READY))
             return onConfirmReadyMessage(userFound);
 
-
         if (message.type().equals(SocketMessageTypeEnum.BET_CARD))
             return onBetCardMessage(message.card().id(), userFound);
 
         return null;
     }
 
-    private void startRound() {
-        buyFirstCards();
-    }
-
-    private void buyFirstCards() {
-//        System.out.println(connection.getOpenConnections().toArray());
-
-        for (ManagedUserDTO userDTO : readyPlayers.keySet()) {
-            decksByUsers.put(userDTO, getDeck(userDTO.id()));
-
-            List<Card> cards = List.of(
-                    decksByUsers.get(userDTO).pop(),
-                    decksByUsers.get(userDTO).pop(),
-                    decksByUsers.get(userDTO).pop()
-            );
-
-//            openConnections.findByConnectionId(userDTO.id().toString())
-//                    .stream()
-//                    .findFirst()
-//                    .get()
-//                    .sendTextAndAwait(new SocketMessageDTO(
-//                            SocketMessageTypeEnum.BUYING_CARDS,
-//                            cards.stream().map(OutCardDTO::new).toList()
-//                    ));
-        }
-    }
-
-    private Stack<Card> getDeck(Long userId) {
-        Deck deckFound = deckService.findActiveUserDeck(userId);
-
-        Stack<Card> playingDeck = new Stack<Card>();
-
-        playingDeck.addAll(deckFound
-                .getCards()
-                .stream()
-                .map(DeckCard::getCard)
-                .toList());
-
-        Collections.shuffle(playingDeck);
-
-        return playingDeck;
-    }
-
     private SocketMessageDTO onConfirmReadyMessage(User userFound) {
-        readyPlayers.put(new ManagedUserDTO(userFound), true);
+        readyPlayers.put(new ManagedUserDTO(userFound, connection.id()), true);
 
-        if (!readyPlayers.containsValue(false) && readyPlayers.size() > 1) startRound();
+        if (!readyPlayers.containsValue(false) && readyPlayers.size() > 1) roundManager.startRound(readyPlayers);
 
         return new SocketMessageDTO(SocketMessageTypeEnum.CONFIRM_READY,
-                new ManagedUserDTO(userFound),
+                new ManagedUserDTO(userFound, connection.id()),
                 readyPlayers.keySet());
     }
 
@@ -141,7 +93,7 @@ public class RoomSocket {
         Card bettedCard = cardService.findCardById(cardId);
 
         return new SocketMessageDTO(SocketMessageTypeEnum.BET_CARD,
-                new ManagedUserDTO(userFound),
+                new ManagedUserDTO(userFound, connection.id()),
                 new OutCardDTO(bettedCard));
     }
 }

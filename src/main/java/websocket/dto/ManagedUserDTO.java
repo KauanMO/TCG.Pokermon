@@ -4,9 +4,10 @@ import models.User;
 
 public record ManagedUserDTO(
         Long id,
-        String username
+        String username,
+        String connectionId
 ) {
-    public ManagedUserDTO(User u) {
-        this(u.getId(), u.getUsername());
+    public ManagedUserDTO(User u, String connectionId) {
+        this(u.getId(), u.getUsername(), connectionId);
     }
 }
