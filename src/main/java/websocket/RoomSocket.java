@@ -70,13 +70,19 @@ public class RoomSocket {
 
         SocketMessageDTO message = Json.decodeValue(stringMessage, SocketMessageDTO.class);
 
-        if (message.type().equals(SocketMessageTypeEnum.CONFIRM_READY))
-            return onConfirmReadyMessage(userFound);
+        switch (message.type()) {
+            case SocketMessageTypeEnum.CONFIRM_READY -> {
+                return onConfirmReadyMessage(userFound);
+            }
 
-        if (message.type().equals(SocketMessageTypeEnum.BET_CARD))
-            return onBetCardMessage(message.card().id(), userFound);
+            case SocketMessageTypeEnum.BET_CARD -> {
+                return onBetCardMessage(message.card().id(), userFound);
+            }
 
-        return null;
+            default -> {
+                return null;
+            }
+        }
     }
 
     private SocketMessageDTO onConfirmReadyMessage(User userFound) {

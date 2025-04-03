@@ -6,5 +6,6 @@ public enum SocketMessageTypeEnum {
     GAME_OFF,
     USER_LEFT,
     CONFIRM_READY,
-    BUYING_CARDS
+    BUYING_CARDS,
+    REQUEST_BET
 }
