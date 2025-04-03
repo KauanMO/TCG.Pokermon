@@ -38,6 +38,14 @@ public class UserService {
         return userFound;
     }
 
+    public User getUserInfo(Long userId) {
+        User userFound = repository.findById(userId);
+
+        if(userId == null) throw new UserNotFoundException();
+
+        return userFound;
+    }
+
     public Optional<User> findUserById(Long userId) {
         User userFound = repository.findById(userId);
 
