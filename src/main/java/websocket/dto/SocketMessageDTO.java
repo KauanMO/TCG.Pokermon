@@ -9,24 +9,27 @@ public record SocketMessageDTO(
         SocketMessageTypeEnum type,
         ManagedUserDTO user,
         String message,
-        OutCardDTO card,
-        Long nextPlayerId,
         List<String> players,
-        List<OutCardDTO> cards
+        List<OutCardDTO> cards,
+        ManagedUserDTO nextPlayer
 ) {
     public SocketMessageDTO(SocketMessageTypeEnum type, ManagedUserDTO user, Set<ManagedUserDTO> players) {
-        this(type, user, null, null, null, players.stream().map(ManagedUserDTO::username).toList(), null);
+        this(type, user, null, players.stream().map(ManagedUserDTO::username).toList(), null, null);
     }
 
-    public SocketMessageDTO(SocketMessageTypeEnum type, ManagedUserDTO user, OutCardDTO card) {
-        this(type, user, null, card, null, null, null);
+    public SocketMessageDTO(SocketMessageTypeEnum type, ManagedUserDTO user, List<OutCardDTO> cards, ManagedUserDTO nextPlayer) {
+        this(type, user, null, null, cards, nextPlayer);
     }
 
     public SocketMessageDTO(SocketMessageTypeEnum type) {
-        this(type, null, null, null, null, null, null);
+        this(type, null, null, null, null, null);
     }
 
     public SocketMessageDTO(SocketMessageTypeEnum type, List<OutCardDTO> cards) {
-        this(type, null, null, null, null, null, cards);
+        this(type, null, null, null, cards, null);
+    }
+
+    public SocketMessageDTO(SocketMessageTypeEnum type, String message) {
+        this(type, null, message, null, null, null);
     }
 }

@@ -11,31 +11,31 @@ import services.CardService;
 import services.DeckService;
 import services.UserService;
 import services.exceptions.UserNotFoundException;
+import websocket.dto.BettedCardsDTO;
 import websocket.dto.ManagedUserDTO;
 import websocket.dto.OutCardDTO;
 import websocket.dto.SocketMessageDTO;
 import websocket.enums.SocketMessageTypeEnum;
+import websocket.exceptions.BettedCardsValueNotEnoughException;
+import websocket.exceptions.WrongUserTurnException;
 
 import java.util.*;
 
 @WebSocket(path = "/room/{userId}")
 public class RoomSocket {
     @Inject
-    WebSocketConnection connection;
+    private WebSocketConnection connection;
 
     @Inject
     private UserService userService;
 
     @Inject
-    private CardService cardService;
-
-    @Inject
     private RoundManager roundManager;
 
     @Inject
-    OpenConnections openConnections;
+    private OpenConnections openConnections;
 
-    Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
+    private Map<ManagedUserDTO, Boolean> readyPlayers = new HashMap<>();
 
     @Transactional
     @OnOpen(broadcast = true)
@@ -76,7 +76,11 @@ public class RoomSocket {
             }
 
             case SocketMessageTypeEnum.BET_CARD -> {
-                return onBetCardMessage(message.card().id(), userFound);
+                return onBetCardMessage(message
+                                .cards().stream()
+                                .map(OutCardDTO::id)
+                                .toList(),
+                        userFound);
             }
 
             default -> {
@@ -95,11 +99,20 @@ public class RoomSocket {
                 readyPlayers.keySet());
     }
 
-    private SocketMessageDTO onBetCardMessage(Long cardId, User userFound) {
-        Card bettedCard = cardService.findCardById(cardId);
+    private SocketMessageDTO onBetCardMessage(List<Long> cardsIds, User userFound) {
+        try {
+            BettedCardsDTO bettedCards = roundManager.betCard(cardsIds, userFound);
 
-        return new SocketMessageDTO(SocketMessageTypeEnum.BET_CARD,
-                new ManagedUserDTO(userFound, connection.id()),
-                new OutCardDTO(bettedCard));
+            return new SocketMessageDTO(SocketMessageTypeEnum.BET_CARD,
+                    new ManagedUserDTO(userFound, connection.id()),
+                    new ArrayList<>(bettedCards
+                            .cards().stream()
+                            .map(OutCardDTO::new)
+                            .toList()),
+                    bettedCards.nextPlayer());
+        } catch (WrongUserTurnException | BettedCardsValueNotEnoughException e) {
+            return new SocketMessageDTO(SocketMessageTypeEnum.ERROR,
+                    e.getMessage());
+        }
     }
 }
