@@ -29,19 +29,14 @@ import java.util.*;
 public class CardService {
     @RestClient
     private CardsRestClient cardsRestClient;
-
     @Inject
     private CardRepository repository;
-
     @Inject
     private CardSetService cardSetService;
-
     @Inject
     private UserService userService;
-
     @Inject
     private CardTypeRepository cardTypeRepository;
-
     @Inject
     private CardSubtypeRepository cardSubtypeRepository;
 
