@@ -40,6 +40,14 @@ public class GlobalExceptionMapper {
 
     @ServerExceptionMapper
     public Response exception(ClientWebApplicationException e) {
+        return Response
+                .status(500)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(Exception e) {
         System.out.println(e.getMessage());
 
         return Response
