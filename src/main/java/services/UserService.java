@@ -6,6 +6,9 @@ import jakarta.transaction.Transactional;
 import models.User;
 import repositories.UserRepository;
 import rest.dtos.user.CreateUserDTO;
+import rest.dtos.user.LoginDTO;
+import services.exceptions.IncorrectPasswordException;
+import services.exceptions.UserNotFoundException;
 
 import java.util.Optional;
 
@@ -25,6 +28,22 @@ public class UserService {
         repository.persist(newUser);
 
         return newUser;
+    }
+
+    public User login(LoginDTO dto) {
+        User userFound = repository.findByEmail(dto.email()).orElseThrow(UserNotFoundException::new);
+
+        if(!userFound.getPassword().equals(dto.password())) throw new IncorrectPasswordException();
+
+        return userFound;
+    }
+
+    public User getUserInfo(Long userId) {
+        User userFound = repository.findById(userId);
+
+        if(userId == null) throw new UserNotFoundException();
+
+        return userFound;
     }
 
     public Optional<User> findUserById(Long userId) {
