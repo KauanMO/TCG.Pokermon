@@ -6,6 +6,7 @@ import java.util.List;
 
 public record CardsIncrementDTO(
         Integer page,
-        List<OutCardDTO> cards
+        List<OutCardDTO> cards,
+        Integer totalCount
 ) {
 }

@@ -47,34 +47,33 @@ public class CardSetService {
         return cardset;
     }
 
-    public CardSetWithCardsDTO findByIdWithCards(Long id, Integer page) {
+    public CardSetWithCardsDTO findByIdWithCards(Long id, Integer page, Integer pageSize) {
         CardSet cardSet = findById(id);
 
-        var cardsRedis = incrementService.get(cardSet.getExternalId());
+        var cardsRedis = incrementService.get(cardSet.getExternalId() + "page-" + page);
 
-        if (cardsRedis != null) return new CardSetWithCardsDTO(cardSet, cardsRedis.cards());
+        if (cardsRedis != null && cardsRedis.page().equals(page))
+            return new CardSetWithCardsDTO(cardSet, cardsRedis.cards(), cardsRedis.totalCount());
 
-        Set<ExternalCardDTO> setCards = cardsRestClient
+        var externalResponse = cardsRestClient
                 .get("set.id:" + cardSet.getExternalId() + " supertype:pokemon",
                         "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,set,cardmarket",
-                        20,
+                        pageSize,
                         page,
-                        "-cardmarket.prices.averageSellPrice")
-                .data();
+                        "-cardmarket.prices.averageSellPrice");
 
-        List<OutCardDTO> orderedCards = new ArrayList<>(setCards.stream()
+        List<OutCardDTO> orderedCards = new ArrayList<>(externalResponse.data().stream()
                 .sorted(Comparator
                         .comparingDouble(c -> c.cardmarket()
                                 .prices()
                                 .averageSellPrice()))
                 .map(OutCardDTO::new)
                 .toList());
-
         Collections.reverse(orderedCards);
 
-        incrementService.set(cardSet.getExternalId(), new CardsIncrementDTO(page, orderedCards));
+        incrementService.set(cardSet.getExternalId() + "page-" + page, new CardsIncrementDTO(page, orderedCards, externalResponse.totalCount()));
 
-        return new CardSetWithCardsDTO(cardSet, orderedCards);
+        return new CardSetWithCardsDTO(cardSet, orderedCards, externalResponse.totalCount());
     }
 
     public void verifyCardSet(User user, String externalSetId) {

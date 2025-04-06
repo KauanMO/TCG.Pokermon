@@ -22,9 +22,9 @@ public class CardSetResource {
 
     @GET
     @Path("{id}")
-    public Response getById(Long id, @QueryParam("page") Integer page) {
+    public Response getById(Long id, @QueryParam("page") Integer page, @QueryParam("pageSize") Integer pageSize) {
         return Response
-                .ok(service.findByIdWithCards(id, page))
+                .ok(service.findByIdWithCards(id, page, pageSize))
                 .build();
     }
 }

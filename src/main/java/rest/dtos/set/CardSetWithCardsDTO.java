@@ -7,6 +7,7 @@ import java.util.List;
 
 public record CardSetWithCardsDTO(
         CardSet cardSet,
-        List<OutCardDTO> cards
+        List<OutCardDTO> cards,
+        Integer totalCount
 ) {
 }
