@@ -7,6 +7,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import rest.dtos.card.OpenedCardDTO;
+import rest.dtos.card.OutCardDTO;
 import services.CardService;
 
 @Path("cards")
@@ -36,6 +37,18 @@ public class CardResource {
 
         return Response
                 .ok(new OpenedCardDTO(openedCard))
+                .build();
+    }
+
+    @GET
+    @Path("{userId}")
+    public Response getCardsByUserId(Long userId) {
+        var cards = service.findByUserId(userId);
+
+        return Response.
+                ok(cards.stream()
+                        .map(OutCardDTO::new)
+                        .toList())
                 .build();
     }
 }
