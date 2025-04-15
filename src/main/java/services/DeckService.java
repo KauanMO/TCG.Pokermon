@@ -14,13 +14,14 @@ import services.exceptions.UserNotFoundException;
 public class DeckService {
     @Inject
     private DeckRepository repository;
-
     @Inject
     private UserService userService;
+    @Inject
+    private TokenService tokenService;
 
     @Transactional
-    public Deck createDeck(CreateDeckDTO dto, Long userId) {
-        User userFound = userService.findUserById(userId).orElseThrow(UserNotFoundException::new);
+    public Deck createDeck(CreateDeckDTO dto) {
+        User userFound = userService.findUserById(tokenService.getUserId()).orElseThrow(UserNotFoundException::new);
 
         Deck newDeck = Deck.builder()
                 .user(userFound)

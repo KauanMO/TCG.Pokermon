@@ -31,9 +31,9 @@ public class CardResource {
     }
 
     @POST
-    @Path("open-set/{setExternalId}/{userId}")
-    public Response openSet(String setExternalId, Long userId) {
-        var openedCard = service.openCardSet(setExternalId, userId);
+    @Path("open-set/{setExternalId}")
+    public Response openSet(String setExternalId) {
+        var openedCard = service.openCardSet(setExternalId);
 
         return Response
                 .ok(new OpenedCardDTO(openedCard))
@@ -41,9 +41,9 @@ public class CardResource {
     }
 
     @GET
-    @Path("{userId}")
-    public Response getCardsByUserId(Long userId) {
-        var cards = service.findByUserId(userId);
+    @Path("my-cards")
+    public Response getMyCards() {
+        var cards = service.findMyCards();
 
         return Response.
                 ok(cards.stream()

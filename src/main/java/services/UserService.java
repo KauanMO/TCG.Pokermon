@@ -9,15 +9,15 @@ import rest.dtos.user.CreateUserDTO;
 import rest.dtos.user.LoginDTO;
 import services.exceptions.IncorrectPasswordException;
 import services.exceptions.UserNotFoundException;
-import websocket.dto.OutCardDTO;
 
-import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
 public class UserService {
     @Inject
     private UserRepository repository;
+    @Inject
+    private TokenService tokenService;
 
     @Transactional
     public User registerUser(CreateUserDTO dto) {
@@ -35,7 +35,7 @@ public class UserService {
     public User login(LoginDTO dto) {
         User userFound = repository.findByEmail(dto.email()).orElseThrow(UserNotFoundException::new);
 
-        if(!userFound.getPassword().equals(dto.password())) throw new IncorrectPasswordException();
+        if (!userFound.getPassword().equals(dto.password())) throw new IncorrectPasswordException();
 
         return userFound;
     }
@@ -43,9 +43,13 @@ public class UserService {
     public User getUserInfo(Long userId) {
         User userFound = repository.findById(userId);
 
-        if(userId == null) throw new UserNotFoundException();
+        if (userId == null) throw new UserNotFoundException();
 
         return userFound;
+    }
+
+    public User getCurrentUserInfo() {
+        return getUserInfo(tokenService.getUserId());
     }
 
     public Optional<User> findUserById(Long userId) {

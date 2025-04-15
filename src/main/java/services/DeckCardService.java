@@ -24,19 +24,19 @@ import java.util.stream.Stream;
 public class DeckCardService {
     @Inject
     private DeckCardRepository repository;
-
     @Inject
     private CardService cardService;
-
     @Inject
     private DeckService deckService;
+    @Inject
+    private TokenService tokenService;
 
     @Transactional
-    public ValidatedCardsDTO createDeckCards(CreateDeckCardDTO dto, Long userId) {
+    public ValidatedCardsDTO createDeckCards(CreateDeckCardDTO dto) {
         ValidatedCardsDTO validatedCards = new ValidatedCardsDTO(new ArrayList<>(), new ArrayList<>());
         List<DeckCard> newDeckCards = new ArrayList<>();
 
-        Deck deckFound = deckService.findByIdUserId(dto.deckId(), userId);
+        Deck deckFound = deckService.findByIdUserId(dto.deckId(), tokenService.getUserId());
 
         List<Card> cards = validateNewDeckCards(deckFound, dto.cardIds());
 

@@ -14,8 +14,8 @@ public class DeckCardResource {
 
     @POST
     @Path("{userId}")
-    public Response createDeckCards(CreateDeckCardDTO dto, Long userId) {
-        var validatedCards = service.createDeckCards(dto, userId);
+    public Response createDeckCards(CreateDeckCardDTO dto) {
+        var validatedCards = service.createDeckCards(dto);
 
         return Response
                 .ok(validatedCards)
