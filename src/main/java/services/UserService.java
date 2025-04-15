@@ -9,7 +9,9 @@ import rest.dtos.user.CreateUserDTO;
 import rest.dtos.user.LoginDTO;
 import services.exceptions.IncorrectPasswordException;
 import services.exceptions.UserNotFoundException;
+import websocket.dto.OutCardDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped

@@ -168,6 +168,10 @@ public class CardService {
         cardSubtypeRepository.persist(cardSubtypes);
     }
 
+    public List<Card> findByUserId(Long userId) {
+        return repository.findByUserId(userId);
+    }
+
     public Card findCardById(Long id) {
         Card cardFound = repository.findById(id);
 
