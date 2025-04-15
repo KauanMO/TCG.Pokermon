@@ -4,12 +4,14 @@ import enums.CardRarityEnum;
 import enums.CardSubtypeEnum;
 import enums.CardTypeEnum;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import models.Card;
 import models.CardSubtype;
 import models.CardType;
 import models.User;
+import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardRepository;
 import repositories.CardSubtypeRepository;
@@ -39,6 +41,8 @@ public class CardService {
     private CardTypeRepository cardTypeRepository;
     @Inject
     private CardSubtypeRepository cardSubtypeRepository;
+    @Inject
+    TokenService tokenService;
 
     private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText,evolvesFrom";
 
@@ -104,8 +108,8 @@ public class CardService {
     }
 
     @Transactional
-    public Card openCardSet(String externalSetId, Long userId) {
-        User userFound = userService.findUserById(userId).orElseThrow(UserNotFoundException::new);
+    public Card openCardSet(String externalSetId) {
+        User userFound = userService.findUserById(tokenService.getUserId()).orElseThrow(UserNotFoundException::new);
 
         cardSetService.verifyCardSet(userFound, externalSetId);
 
@@ -170,6 +174,10 @@ public class CardService {
 
     public List<Card> findByUserId(Long userId) {
         return repository.findByUserId(userId);
+    }
+
+    public List<Card> findMyCards() {
+        return this.findByUserId(tokenService.getUserId());
     }
 
     public Card findCardById(Long id) {

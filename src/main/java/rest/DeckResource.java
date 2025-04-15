@@ -16,8 +16,8 @@ public class DeckResource {
 
     @POST
     @Path("{userId}")
-    public Response createDeck(CreateDeckDTO dto, Long userId) {
-        Deck newDeck = service.createDeck(dto, userId);
+    public Response createDeck(CreateDeckDTO dto) {
+        Deck newDeck = service.createDeck(dto);
 
         return Response
                 .ok(new OutDeckDTO(newDeck))

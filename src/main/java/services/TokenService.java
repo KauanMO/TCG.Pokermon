@@ -1,14 +1,22 @@
 package services;
 
 import io.smallrye.jwt.build.Jwt;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import lombok.Getter;
 import models.User;
+import org.eclipse.microprofile.jwt.Claim;
 
 import java.util.HashSet;
 import java.util.List;
 
-@ApplicationScoped
+@RequestScoped
+@Getter
 public class TokenService {
+    @Inject
+    @Claim("userId")
+    private Long userId;
+
     public String generateToken(User user, List<String> groups) {
         long duration = 3600;
         long currentTime = System.currentTimeMillis() / 1000;

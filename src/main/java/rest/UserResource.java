@@ -33,6 +33,7 @@ public class UserResource {
     JsonWebToken jwt;
 
     @POST
+    @PermitAll
     public Response createUser(CreateUserDTO dto) {
         var newUser = service.registerUser(dto);
 

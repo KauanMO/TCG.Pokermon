@@ -1,34 +1,23 @@
 package services;
 
-import io.smallrye.jwt.auth.principal.JWTParser;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import models.User;
-import org.eclipse.microprofile.jwt.Claim;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import repositories.UserRepository;
 import rest.dtos.user.CreateUserDTO;
 import rest.dtos.user.LoginDTO;
 import services.exceptions.IncorrectPasswordException;
 import services.exceptions.UserNotFoundException;
-import websocket.dto.OutCardDTO;
 
-import java.util.List;
 import java.util.Optional;
 
-@RequestScoped
+@ApplicationScoped
 public class UserService {
     @Inject
     private UserRepository repository;
-
     @Inject
-    @Claim("userId")
-    Long userId;
-
-    @Inject
-    JWTParser parser;
+    private TokenService tokenService;
 
     @Transactional
     public User registerUser(CreateUserDTO dto) {
@@ -60,7 +49,7 @@ public class UserService {
     }
 
     public User getCurrentUserInfo() {
-        return getUserInfo(this.userId);
+        return getUserInfo(tokenService.getUserId());
     }
 
     public Optional<User> findUserById(Long userId) {
