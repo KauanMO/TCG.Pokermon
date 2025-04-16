@@ -1,4 +1,4 @@
-package rest.dtos.set;
+package rest.dtos.cardSet;
 
 import java.time.LocalDate;
 
@@ -10,6 +10,5 @@ public record ExternalSetDTO(
         LocalDate releasedDate,
         ExternalSetImagesDTO images
         ) {
-    record ExternalSetImagesDTO(String symbol, String logo) {
-    }
+    public record ExternalSetImagesDTO(String symbol, String logo) { }
 }

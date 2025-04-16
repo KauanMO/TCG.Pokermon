@@ -1,6 +1,6 @@
 package rest.dtos.card;
 
-import rest.dtos.set.ExternalSetDTO;
+import rest.dtos.cardSet.ExternalSetDTO;
 
 import java.util.List;
 

@@ -4,16 +4,21 @@ import infra.redis.IncrementOutCardDTOService;
 import infra.redis.dto.CardsIncrementDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import models.CardSet;
 import models.User;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardSetRepository;
 import rest.clients.CardsRestClient;
 import rest.clients.SetsRestClient;
-import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.card.OutCardDTO;
-import rest.dtos.set.CardSetWithCardsDTO;
+import rest.dtos.cardSet.CardSetWithCardsDTO;
+import rest.dtos.cardSet.CreateCardSetDTO;
+import rest.dtos.cardSet.ExternalSetDTO;
+import rest.dtos.external.ExternalCardResponseDTO;
 import services.exceptions.CardSetNotFound;
+import services.exceptions.DuplicatedUniqueEntityException;
+import services.exceptions.ExternalContentNotFoundException;
 import services.exceptions.NoBalanceEnoughException;
 
 import java.util.*;
@@ -23,14 +28,53 @@ import java.util.stream.Collectors;
 public class CardSetService {
     @Inject
     private CardSetRepository repository;
-    @RestClient
-    private SetsRestClient setsRestClient;
     @Inject
     private UserService userService;
     @Inject
     private IncrementOutCardDTOService incrementService;
     @RestClient
+    private SetsRestClient setsRestClient;
+    @RestClient
     private CardsRestClient cardsRestClient;
+
+    @Transactional
+    public CardSet createCardSet(CreateCardSetDTO dto) {
+        ExternalSetDTO cardSetResponse = setsRestClient.get("id:" + dto.externalId(), "id,name,series,images")
+                .data()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ExternalContentNotFoundException("Cardset"));
+
+        ExternalCardResponseDTO externalResponse = requestCardsOrderedByPrice(cardSetResponse.id(), 3, 1);
+
+        List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse);
+
+        Double cardSetPrice = orderedCards.stream()
+                .mapToDouble(OutCardDTO::price)
+                .sum()
+                / orderedCards.size();
+
+        if (repository.findByExternalId(dto.externalId()).isPresent()) {
+            throw new DuplicatedUniqueEntityException("Cardset");
+        }
+
+        CardSet cardSet = CardSet
+                .builder()
+                .name(cardSetResponse.name())
+                .logo(cardSetResponse.images().logo())
+                .symbol(cardSetResponse.images().symbol())
+                .series(cardSetResponse.series())
+                .externalId(cardSetResponse.id())
+                .firstCardImage(orderedCards.getFirst().images().small())
+                .secondCardImage(orderedCards.get(1).images().small())
+                .thirdCardImage(orderedCards.getLast().images().small())
+                .price(cardSetPrice)
+                .build();
+
+        repository.persist(cardSet);
+
+        return cardSet;
+    }
 
     public Set<CardSet> findCardSets() {
         return repository
@@ -55,14 +99,26 @@ public class CardSetService {
         if (cardsRedis != null && cardsRedis.page().equals(page))
             return new CardSetWithCardsDTO(cardSet, cardsRedis.cards(), cardsRedis.totalCount());
 
-        var externalResponse = cardsRestClient
-                .get("set.id:" + cardSet.getExternalId() + " supertype:pokemon",
+        ExternalCardResponseDTO externalResponse = requestCardsOrderedByPrice(cardSet.getExternalId(), pageSize, page);
+
+        List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse);
+
+        incrementService.set(cardSet.getExternalId() + "page-" + page, new CardsIncrementDTO(page, orderedCards, externalResponse.totalCount()));
+
+        return new CardSetWithCardsDTO(cardSet, orderedCards, externalResponse.totalCount());
+    }
+
+    public ExternalCardResponseDTO requestCardsOrderedByPrice(String cardSetId, Integer pageSize, Integer page) {
+        return cardsRestClient
+                .get("set.id:" + cardSetId + " supertype:pokemon",
                         "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,set,cardmarket",
                         pageSize,
                         page,
                         "-cardmarket.prices.averageSellPrice");
+    }
 
-        List<OutCardDTO> orderedCards = new ArrayList<>(externalResponse.data().stream()
+    public List<OutCardDTO> orderCardsByPriceDesc(ExternalCardResponseDTO cards) {
+        List<OutCardDTO> orderedCards = new ArrayList<>(cards.data().stream()
                 .sorted(Comparator
                         .comparingDouble(c -> c.cardmarket()
                                 .prices()
@@ -71,9 +127,7 @@ public class CardSetService {
                 .toList());
         Collections.reverse(orderedCards);
 
-        incrementService.set(cardSet.getExternalId() + "page-" + page, new CardsIncrementDTO(page, orderedCards, externalResponse.totalCount()));
-
-        return new CardSetWithCardsDTO(cardSet, orderedCards, externalResponse.totalCount());
+        return orderedCards;
     }
 
     public void verifyCardSet(User user, String externalSetId) {

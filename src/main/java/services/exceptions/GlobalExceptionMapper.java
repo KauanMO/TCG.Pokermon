@@ -47,6 +47,30 @@ public class GlobalExceptionMapper {
     }
 
     @ServerExceptionMapper
+    public Response exception(UserWithoutRoleException e) {
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(DuplicatedUniqueEntityException e) {
+        return Response
+                .status(Response.Status.CONFLICT)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(ExternalContentNotFoundException e) {
+        return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
     public Response exception(Exception e) {
         System.out.println(e.getMessage());
 

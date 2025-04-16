@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import lombok.Getter;
 import models.User;
 import org.eclipse.microprofile.jwt.Claim;
+import services.exceptions.UserWithoutRoleException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,8 @@ public class TokenService {
     public String generateToken(User user) {
         long duration = 3600;
         long currentTime = System.currentTimeMillis() / 1000;
+
+        if (user.getRole() == null) throw new UserWithoutRoleException();
 
         return Jwt
                 .issuer("pokermon_issuer")
