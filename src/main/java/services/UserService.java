@@ -25,6 +25,7 @@ public class UserService {
                 .username(dto.username())
                 .email(dto.email())
                 .password(dto.password())
+                .role(1)
                 .build();
 
         repository.persist(newUser);

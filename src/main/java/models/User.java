@@ -27,6 +27,7 @@ public class User {
     public Boolean active;
     public LocalDate createdDate;
     public Double balance;
+    public Integer role;
 
     @OneToMany(mappedBy = "user")
     public List<Card> cards = new ArrayList<>();
