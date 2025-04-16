@@ -47,7 +47,7 @@ public class UserResource {
     @PermitAll
     public Response login(LoginDTO dto) {
         var userFound = service.login(dto);
-        String token = tokenService.generateToken(userFound, List.of("USER", "ADMIN"));
+        String token = tokenService.generateToken(userFound);
 
         return Response
                 .ok(new OutUserDTO(userFound, token))
