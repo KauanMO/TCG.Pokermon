@@ -1,4 +1,4 @@
-package rest.dtos.set;
+package rest.dtos.cardSet;
 
 import models.CardSet;
 import rest.dtos.card.OutCardDTO;
