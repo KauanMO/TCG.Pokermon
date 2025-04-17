@@ -13,12 +13,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - quarkus_net
+      - pokermon_network
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - pokermon_network
 
   quarkus:
     image: kauanmatheusoliveira/pokermon:0.1.0
@@ -34,10 +36,10 @@ services:
       - db
       - redis
     networks:
-      - quarkus_net
+      - pokermon_network
 
 volumes:
   pgdata:
 
 networks:
-  quarkus_net:
+  pokermon_network:
