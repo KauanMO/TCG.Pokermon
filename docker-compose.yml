@@ -13,12 +13,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - quarkus_net
+      - pokermon_network
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - pokermon_network
 
   quarkus:
     image: kauanmatheusoliveira/pokermon:0.1.0
@@ -27,16 +29,17 @@ services:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER}
       QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
     ports:
       - "8080:8080"
     depends_on:
       - db
       - redis
     networks:
-      - quarkus_net
+      - pokermon_network
 
 volumes:
   pgdata:
 
 networks:
-  quarkus_net:
+  pokermon_network:
