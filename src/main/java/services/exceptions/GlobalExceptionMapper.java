@@ -71,6 +71,14 @@ public class GlobalExceptionMapper {
     }
 
     @ServerExceptionMapper
+    public Response exception(UserNotFoundException e) {
+        return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
     public Response exception(Exception e) {
         System.out.println(e.getMessage());
 
