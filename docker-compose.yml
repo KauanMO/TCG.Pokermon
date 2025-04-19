@@ -23,7 +23,7 @@ services:
       - pokermon_network
 
   quarkus:
-    image: kauanmatheusoliveira/pokermon:0.1.2
+    image: kauanmatheusoliveira/pokermon:0.1.3
     container_name: quarkus_app
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
