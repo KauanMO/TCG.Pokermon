@@ -17,7 +17,7 @@ import rest.dtos.cardSet.CardSetWithCardsDTO;
 import rest.dtos.cardSet.CreateCardSetDTO;
 import rest.dtos.cardSet.ExternalSetDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
-import services.exceptions.CardSetNotFound;
+import services.exceptions.CardSetNotFoundException;
 import services.exceptions.DuplicatedUniqueEntityException;
 import services.exceptions.ExternalContentNotFoundException;
 import services.exceptions.NoBalanceEnoughException;
@@ -98,7 +98,7 @@ public class CardSetService {
     public CardSet findById(Long id) {
         CardSet cardset = repository.findById(id);
 
-        if (cardset == null) throw new CardSetNotFound();
+        if (cardset == null) throw new CardSetNotFoundException();
 
         return cardset;
     }
@@ -145,7 +145,7 @@ public class CardSetService {
     public CardSet verifyCardSet(User user, Long setId) {
         CardSet cardSetFound = repository.findById(setId);
 
-        if (cardSetFound == null) throw new CardSetNotFound();
+        if (cardSetFound == null) throw new CardSetNotFoundException();
 
         if (user.getBalance() < cardSetFound.getPrice()) throw new NoBalanceEnoughException();
 
