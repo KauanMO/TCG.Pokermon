@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Entity
 @Builder
@@ -27,4 +29,7 @@ public class CardSet {
     public String firstCardImage;
     public String secondCardImage;
     public String thirdCardImage;
+
+    @OneToMany
+    public List<ShopCard> shopCards;
 }

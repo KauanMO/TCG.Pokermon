@@ -1,6 +1,5 @@
 package models;
 
-import enums.CardRarityEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

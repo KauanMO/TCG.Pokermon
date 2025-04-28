@@ -1,8 +1,5 @@
 package services;
 
-import enums.CardRarityEnum;
-import enums.CardSubtypeEnum;
-import enums.CardTypeEnum;
 import infra.redis.IncrementOutCardDTOService;
 import infra.redis.dto.CardsIncrementDTO;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,10 +10,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardSetRepository;
 import repositories.CardSubtypeRepository;
 import repositories.CardTypeRepository;
-import repositories.ShopCardRepository;
 import rest.clients.CardsRestClient;
 import rest.clients.SetsRestClient;
-import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.card.OutCardDTO;
 import rest.dtos.cardSet.CardSetWithCardsDTO;
 import rest.dtos.cardSet.CreateCardSetDTO;
@@ -26,9 +21,7 @@ import services.exceptions.CardSetNotFound;
 import services.exceptions.DuplicatedUniqueEntityException;
 import services.exceptions.ExternalContentNotFoundException;
 import services.exceptions.NoBalanceEnoughException;
-import utils.StringHelper;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,11 +34,11 @@ public class CardSetService {
     @Inject
     private IncrementOutCardDTOService incrementService;
     @Inject
-    private ShopCardRepository shopCardRepository;
-    @Inject
     private CardTypeRepository cardTypeRepository;
     @Inject
     private CardSubtypeRepository cardSubtypeRepository;
+    @Inject
+    private ShopCardService shopCardService;
     @RestClient
     private SetsRestClient setsRestClient;
     @RestClient
@@ -90,39 +83,9 @@ public class CardSetService {
                 .build();
 
         repository.persist(cardSet);
-        registerShopCards(externalResponse.data(), cardSet.getExternalId(), cardSet.getName());
+        shopCardService.registerShopCards(externalResponse.data(), cardSet);
 
         return cardSet;
-    }
-
-    @Transactional
-    public void registerShopCards(Set<ExternalCardDTO> cards, String setId, String setName) {
-        List<ShopCard> shopCards = new ArrayList<>();
-
-        for (ExternalCardDTO card : cards) {
-            shopCards.add(ShopCard.builder()
-                    .descripton(card.flavorText())
-                    .setId(setId)
-                    .evolvesFrom(card.evolvesFrom())
-                    .largeImage(card.images().large())
-                    .smallImage(card.images().small())
-                    .externalCode(card.id())
-                    .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(card.rarity())))
-                    .averagePrice(card.cardmarket().prices().averageSellPrice())
-                    .name(card.name())
-                    .setName(setName)
-                    .types(card
-                            .types().stream()
-                            .map(c -> CardTypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
-                            .toList())
-                    .subtypes(card
-                            .subtypes().stream()
-                            .map(c -> CardSubtypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
-                            .toList())
-                    .build());
-        }
-
-        shopCardRepository.persist(shopCards);
     }
 
     public Set<CardSet> findCardSets() {
@@ -179,11 +142,15 @@ public class CardSetService {
         return orderedCards;
     }
 
-    public void verifyCardSet(User user, String externalSetId) {
-        CardSet cardSetFound = repository.findByExternalId(externalSetId).orElseThrow(CardSetNotFound::new);
+    public CardSet verifyCardSet(User user, Long setId) {
+        CardSet cardSetFound = repository.findById(setId);
+
+        if (cardSetFound == null) throw new CardSetNotFound();
 
         if (user.getBalance() < cardSetFound.getPrice()) throw new NoBalanceEnoughException();
 
         userService.updateUserBalance(user, user.getBalance() - cardSetFound.getPrice());
+
+        return cardSetFound;
     }
 }

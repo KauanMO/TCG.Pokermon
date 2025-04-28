@@ -30,9 +30,6 @@ public class ShopCard {
     public String descripton;
     public String evolvesFrom;
 
-    public String setName;
-    public String setId;
-
     public Double averagePrice;
 
     public List<CardTypeEnum> types = new ArrayList<>();
@@ -41,4 +38,7 @@ public class ShopCard {
 
     @OneToMany(mappedBy = "shopCard")
     public List<Card> acquiredCards;
+
+    @ManyToOne
+    public CardSet cardSet;
 }

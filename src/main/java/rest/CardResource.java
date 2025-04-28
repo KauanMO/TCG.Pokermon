@@ -6,9 +6,12 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
+import models.Card;
 import rest.dtos.card.OpenedCardDTO;
 import rest.dtos.card.OutCardDTO;
 import services.CardService;
+
+import java.util.List;
 
 @Path("cards")
 public class CardResource {
@@ -31,12 +34,12 @@ public class CardResource {
     }
 
     @POST
-    @Path("open-set/{setExternalId}")
-    public Response openSet(String setExternalId) {
-        var openedCard = service.openCardSet(setExternalId);
+    @Path("open-set/{setId}")
+    public Response openSet(Long setId, @QueryParam("amount") Integer amount) {
+        List<Card> openedCards = service.openCardSet(setId, amount);
 
         return Response
-                .ok(new OpenedCardDTO(openedCard))
+                .ok(openedCards.stream().map(OutCardDTO::new))
                 .build();
     }
 
