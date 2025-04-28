@@ -2,6 +2,7 @@ package services;
 
 import infra.redis.IncrementOutCardDTOService;
 import infra.redis.dto.CardsIncrementDTO;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -12,6 +13,7 @@ import repositories.CardSubtypeRepository;
 import repositories.CardTypeRepository;
 import rest.clients.CardsRestClient;
 import rest.clients.SetsRestClient;
+import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.card.OutCardDTO;
 import rest.dtos.cardSet.CardSetWithCardsDTO;
 import rest.dtos.cardSet.CreateCardSetDTO;
@@ -31,12 +33,6 @@ public class CardSetService {
     private CardSetRepository repository;
     @Inject
     private UserService userService;
-    @Inject
-    private IncrementOutCardDTOService incrementService;
-    @Inject
-    private CardTypeRepository cardTypeRepository;
-    @Inject
-    private CardSubtypeRepository cardSubtypeRepository;
     @Inject
     private ShopCardService shopCardService;
     @RestClient
@@ -59,7 +55,7 @@ public class CardSetService {
         ExternalCardResponseDTO externalResponse = cardsRestClient.get("set.id:" + dto.externalId(),
                 "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,cardmarket");
 
-        List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse);
+        List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse.data());
 
         Double cardSetPrice = Math.round(
                 (orderedCards.stream()
@@ -88,6 +84,14 @@ public class CardSetService {
         return cardSet;
     }
 
+    public List<OutCardDTO> orderCardsByPriceDesc(Set<ExternalCardDTO> cards) {
+        return cards.stream()
+                .sorted(Comparator.comparingDouble((ExternalCardDTO c) -> c.cardmarket().prices().averageSellPrice())
+                        .reversed())
+                .map(OutCardDTO::new)
+                .toList();
+    }
+
     public Set<CardSet> findCardSets() {
         return repository
                 .findAll()
@@ -106,43 +110,16 @@ public class CardSetService {
     public CardSetWithCardsDTO findByIdWithCards(Long id, Integer page, Integer pageSize) {
         CardSet cardSet = findById(id);
 
-        var cardsRedis = incrementService.get(cardSet.getExternalId() + "page-" + page);
+        PanacheQuery<ShopCard> cardsQuery = shopCardService.getByCardSetIdOrderByAveragePrice(id, page, pageSize);
 
-        if (cardsRedis != null && cardsRedis.page().equals(page))
-            return new CardSetWithCardsDTO(cardSet, cardsRedis.cards(), cardsRedis.totalCount());
-
-        ExternalCardResponseDTO externalResponse = requestCardsOrderedByPrice(cardSet.getExternalId(), pageSize, page);
-
-        List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse);
-
-        incrementService.set(cardSet.getExternalId() + "page-" + page, new CardsIncrementDTO(page, orderedCards, externalResponse.totalCount()));
-
-        return new CardSetWithCardsDTO(cardSet, orderedCards, externalResponse.totalCount());
+        return new CardSetWithCardsDTO(cardSet,
+                cardsQuery.stream()
+                        .map(OutCardDTO::new)
+                        .toList(),
+                (int) cardsQuery.count());
     }
 
-    public ExternalCardResponseDTO requestCardsOrderedByPrice(String cardSetId, Integer pageSize, Integer page) {
-        return cardsRestClient
-                .get("set.id:" + cardSetId + " supertype:pokemon",
-                        "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,set,cardmarket",
-                        pageSize,
-                        page,
-                        "-cardmarket.prices.averageSellPrice");
-    }
-
-    public List<OutCardDTO> orderCardsByPriceDesc(ExternalCardResponseDTO cards) {
-        List<OutCardDTO> orderedCards = new ArrayList<>(cards.data().stream()
-                .sorted(Comparator
-                        .comparingDouble(c -> c.cardmarket()
-                                .prices()
-                                .averageSellPrice()))
-                .map(OutCardDTO::new)
-                .toList());
-        Collections.reverse(orderedCards);
-
-        return orderedCards;
-    }
-
-    public CardSet verifyCardSet(User user, Long setId) {
+    public CardSet checkUserBalanceAndCardSet(User user, Long setId) {
         CardSet cardSetFound = repository.findById(setId);
 
         if (cardSetFound == null) throw new CardSetNotFoundException();

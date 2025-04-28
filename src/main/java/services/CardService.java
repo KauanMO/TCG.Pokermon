@@ -1,26 +1,17 @@
 package services;
 
-import enums.CardRarityEnum;
-import enums.CardSubtypeEnum;
-import enums.CardTypeEnum;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import models.*;
-import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardRepository;
-import repositories.CardSubtypeRepository;
-import repositories.CardTypeRepository;
 import rest.clients.CardsRestClient;
 import rest.dtos.card.ExternalCardDTO;
-import rest.dtos.card.OpenedCardDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
 import services.exceptions.CardNotFoundException;
 import services.exceptions.UserNotFoundException;
 import utils.CardRarityPicker;
-import utils.StringHelper;
 
 import java.util.*;
 
@@ -84,7 +75,7 @@ public class CardService {
     @Transactional
     public List<Card> openCardSet(Long setId, Integer amount) {
         User userFound = userService.findUserById(tokenService.getUserId()).orElseThrow(UserNotFoundException::new);
-        CardSet cardSet = cardSetService.verifyCardSet(userFound, setId);
+        CardSet cardSet = cardSetService.checkUserBalanceAndCardSet(userFound, setId);
 
         List<Card> newCards = new ArrayList<>();
 
