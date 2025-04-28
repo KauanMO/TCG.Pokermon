@@ -3,6 +3,7 @@ package services;
 import enums.CardRarityEnum;
 import enums.CardSubtypeEnum;
 import enums.CardTypeEnum;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -53,8 +54,8 @@ public class ShopCardService {
         repository.persist(shopCards);
     }
 
-    public List<ShopCard> getByCardSetId(Long cardSetId) {
-        return repository.findBySetId(cardSetId);
+    public PanacheQuery<ShopCard> getByCardSetIdOrderByAveragePrice(Long cardSetId, Integer page, Integer pageSize) {
+        return repository.findBySetIdOrderByAveragePrice(cardSetId, page, pageSize);
     }
 
     public ShopCard getRandomShopCardAndRarity(Long cardSetId) {
