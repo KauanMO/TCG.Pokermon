@@ -1,6 +1,5 @@
 package models;
 
-import enums.CardRarityEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,29 +20,15 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    public String name;
-    public String externalCode;
-    public CardRarityEnum rarity;
-    public String smallImage;
-    public String largeImage;
-    public String descripton;
-    public String evolvesFrom;
-
-    public String setName;
-    public String setId;
-
-    public Double price;
     public Double quality;
     public LocalDate createdDate;
+    public Double price;
 
     @ManyToOne
     public User user;
 
-    @OneToMany(mappedBy = "card")
-    public List<CardType> types = new ArrayList<>();
-
-    @OneToMany(mappedBy = "card")
-    public List<CardSubtype> subtypes = new ArrayList<>();
+    @ManyToOne
+    public ShopCard shopCard;
 
     @OneToMany(mappedBy = "card")
     public List<DeckCard> decks = new ArrayList<>();

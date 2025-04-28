@@ -1,13 +1,12 @@
 package models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -24,9 +23,13 @@ public class CardSet {
     public String series;
     public String symbol;
     public String logo;
+
     public Double price;
 
     public String firstCardImage;
     public String secondCardImage;
     public String thirdCardImage;
+
+    @OneToMany
+    public List<ShopCard> shopCards;
 }

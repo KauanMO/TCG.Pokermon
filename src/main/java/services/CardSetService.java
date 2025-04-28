@@ -5,10 +5,11 @@ import infra.redis.dto.CardsIncrementDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import models.CardSet;
-import models.User;
+import models.*;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardSetRepository;
+import repositories.CardSubtypeRepository;
+import repositories.CardTypeRepository;
 import rest.clients.CardsRestClient;
 import rest.clients.SetsRestClient;
 import rest.dtos.card.OutCardDTO;
@@ -32,6 +33,12 @@ public class CardSetService {
     private UserService userService;
     @Inject
     private IncrementOutCardDTOService incrementService;
+    @Inject
+    private CardTypeRepository cardTypeRepository;
+    @Inject
+    private CardSubtypeRepository cardSubtypeRepository;
+    @Inject
+    private ShopCardService shopCardService;
     @RestClient
     private SetsRestClient setsRestClient;
     @RestClient
@@ -39,24 +46,28 @@ public class CardSetService {
 
     @Transactional
     public CardSet createCardSet(CreateCardSetDTO dto) {
+        if (repository.findByExternalId(dto.externalId()).isPresent()) {
+            throw new DuplicatedUniqueEntityException("Cardset");
+        }
+
         ExternalSetDTO cardSetResponse = setsRestClient.get("id:" + dto.externalId(), "id,name,series,images")
                 .data()
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new ExternalContentNotFoundException("Cardset"));
 
-        ExternalCardResponseDTO externalResponse = requestCardsOrderedByPrice(cardSetResponse.id(), 3, 1);
+        ExternalCardResponseDTO externalResponse = cardsRestClient.get("set.id:" + dto.externalId(),
+                "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,cardmarket");
 
         List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse);
 
-        Double cardSetPrice = orderedCards.stream()
-                .mapToDouble(OutCardDTO::price)
-                .sum()
-                / orderedCards.size();
-
-        if (repository.findByExternalId(dto.externalId()).isPresent()) {
-            throw new DuplicatedUniqueEntityException("Cardset");
-        }
+        Double cardSetPrice = Math.round(
+                (orderedCards.stream()
+                        .limit(3)
+                        .mapToDouble(OutCardDTO::price)
+                        .sum() / orderedCards.size()
+                ) * 100.0
+        ) / 100.0;
 
         CardSet cardSet = CardSet
                 .builder()
@@ -72,6 +83,7 @@ public class CardSetService {
                 .build();
 
         repository.persist(cardSet);
+        shopCardService.registerShopCards(externalResponse.data(), cardSet);
 
         return cardSet;
     }
@@ -130,11 +142,15 @@ public class CardSetService {
         return orderedCards;
     }
 
-    public void verifyCardSet(User user, String externalSetId) {
-        CardSet cardSetFound = repository.findByExternalId(externalSetId).orElseThrow(CardSetNotFound::new);
+    public CardSet verifyCardSet(User user, Long setId) {
+        CardSet cardSetFound = repository.findById(setId);
+
+        if (cardSetFound == null) throw new CardSetNotFound();
 
         if (user.getBalance() < cardSetFound.getPrice()) throw new NoBalanceEnoughException();
 
         userService.updateUserBalance(user, user.getBalance() - cardSetFound.getPrice());
+
+        return cardSetFound;
     }
 }
