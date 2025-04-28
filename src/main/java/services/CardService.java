@@ -37,10 +37,7 @@ public class CardService {
     private CardSetService cardSetService;
     @Inject
     private UserService userService;
-    @Inject
-    private CardTypeRepository cardTypeRepository;
-    @Inject
-    private CardSubtypeRepository cardSubtypeRepository;
+
     @Inject
     TokenService tokenService;
 
@@ -117,59 +114,29 @@ public class CardService {
 
         var quality = Math.round((Math.random() * 2) * 1000.0) / 1000.0;
 
-        Card newCard = Card.builder()
-                .name(externalCard.name())
-                .price(externalCard.cardmarket().prices().averageSellPrice() * quality)
-                .largeImage(externalCard.images().large())
-                .smallImage(externalCard.images().small())
-                .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(externalCard.rarity())))
-                .user(userFound)
-                .descripton(externalCard.flavorText())
-                .externalCode(externalCard.id())
-                .quality(quality)
-                .evolvesFrom(externalCard.evolvesFrom())
-                .setName(externalCard.set().name())
-                .setId(externalCard.set().id())
-                .build();
+//        Card newCard = Card.builder()
+//                .name(externalCard.name())
+//                .price(externalCard.cardmarket().prices().averageSellPrice() * quality)
+//                .largeImage(externalCard.images().large())
+//                .smallImage(externalCard.images().small())
+//                .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(externalCard.rarity())))
+//                .user(userFound)
+//                .descripton(externalCard.flavorText())
+//                .externalCode(externalCard.id())
+//                .quality(quality)
+//                .evolvesFrom(externalCard.evolvesFrom())
+//                .setName(externalCard.set().name())
+//                .setId(externalCard.set().id())
+//                .build();
 
-        repository.persist(newCard);
+//        repository.persist(newCard);
+//
+//        registerCardType(newCard, externalCard.types());
+//        registerCardSubtype(newCard, externalCard.subtypes());
+//
+//        return newCard;
 
-        registerCardType(newCard, externalCard.types());
-        registerCardSubtype(newCard, externalCard.subtypes());
-
-        return newCard;
-    }
-
-    @Transactional
-    public void registerCardType(Card card, List<String> types) {
-        List<CardType> cardTypes = new ArrayList<>();
-
-        for (String type : types) {
-            cardTypes.add(
-                    CardType.builder()
-                            .type(CardTypeEnum.valueOf(StringHelper.enumStringBuilder(type)))
-                            .card(card)
-                            .build()
-            );
-        }
-
-        cardTypeRepository.persist(cardTypes);
-    }
-
-    @Transactional
-    public void registerCardSubtype(Card card, List<String> subtypes) {
-        List<CardSubtype> cardSubtypes = new ArrayList<>();
-
-        for (String type : subtypes) {
-            cardSubtypes.add(
-                    CardSubtype.builder()
-                            .subtype(CardSubtypeEnum.valueOf(StringHelper.enumStringBuilder(type)))
-                            .card(card)
-                            .build()
-            );
-        }
-
-        cardSubtypeRepository.persist(cardSubtypes);
+        return null;
     }
 
     public List<Card> findByUserId(Long userId) {

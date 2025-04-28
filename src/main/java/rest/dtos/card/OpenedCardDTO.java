@@ -8,6 +8,6 @@ public record OpenedCardDTO(
         String largeImage
 ) {
     public OpenedCardDTO(Card c) {
-        this(c.getName(), c.getExternalCode(), c.getLargeImage());
+        this(c.getShopCard().getName(), c.getShopCard().getExternalCode(), c.getShopCard().getLargeImage());
     }
 }

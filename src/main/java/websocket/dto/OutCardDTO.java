@@ -10,6 +10,6 @@ public record OutCardDTO(
         Double quality
 ) {
     public OutCardDTO(Card c) {
-        this(c.getId(), c.getName(), c.getLargeImage(), c.getPrice(), c.getQuality());
+        this(c.getId(), c.getShopCard().getName(), c.getShopCard().getLargeImage(), c.getPrice(), c.getQuality());
     }
 }

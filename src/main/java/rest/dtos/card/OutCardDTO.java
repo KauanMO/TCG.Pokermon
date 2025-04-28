@@ -1,5 +1,7 @@
 package rest.dtos.card;
 
+import enums.CardSubtypeEnum;
+import enums.CardTypeEnum;
 import models.Card;
 
 import java.util.List;
@@ -35,25 +37,14 @@ public record OutCardDTO(
     public OutCardDTO(Card c) {
         this(
                 c.getId(),
-                c.getName(),
-                c.getExternalCode(),
-                c.getRarity().name(),
-                c.getDescripton(),
-                c.getTypes()
-                        .stream()
-                        .map(cardType ->
-                                cardType
-                                        .getType()
-                                        .name())
-                        .toList(),
-                c.getSubtypes().stream()
-                        .map(cardType ->
-                                cardType
-                                        .getSubtype()
-                                        .name())
-                        .toList(),
-                c.getEvolvesFrom(),
-                new ExternalCardImagesDTO(c.getSmallImage(), c.getLargeImage()),
+                c.getShopCard().getName(),
+                c.getShopCard().getExternalCode(),
+                c.getShopCard().getRarity().name(),
+                c.getShopCard().getDescripton(),
+                c.getShopCard().getTypes().stream().map(CardTypeEnum::name).toList(),
+                c.getShopCard().getSubtypes().stream().map(CardSubtypeEnum::name).toList(),
+                c.getShopCard().getEvolvesFrom(),
+                new ExternalCardImagesDTO(c.getShopCard().getSmallImage(), c.getShopCard().getLargeImage()),
                 c.getPrice()
         );
     }

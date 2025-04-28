@@ -92,17 +92,17 @@ public class DeckCardService {
         Set<String> seenExternalIds = new HashSet<>();
 
         Optional<Card> doubleCard = cards.stream()
-                .filter(c -> !seenExternalIds.add(c.getExternalCode()))
+                .filter(c -> !seenExternalIds.add(c.getShopCard().getExternalCode()))
                 .findFirst();
 
         if (doubleCard.isPresent())
-            throw new DeckCardValidationException("Duplicated card with external id: " + doubleCard.get().getExternalCode());
+            throw new DeckCardValidationException("Duplicated card with external id: " + doubleCard.get().getShopCard().getExternalCode());
     }
 
     private void validateSameSingleTypeCards(List<Card> cards) {
         Map<CardTypeEnum, List<Card>> cardsByType = cards.stream()
-                .filter(c -> c.getTypes().size() == 1)
-                .collect(Collectors.groupingBy(c -> c.getTypes().get(0).getType()));
+                .filter(c -> c.getShopCard().getTypes().size() == 1)
+                .collect(Collectors.groupingBy(c -> c.getShopCard().getTypes().getFirst()));
 
         for (Map.Entry<CardTypeEnum, List<Card>> entry : cardsByType.entrySet()) {
             if (entry.getValue().size() > 4) {
@@ -113,27 +113,27 @@ public class DeckCardService {
 
     private void validateMultipleTypesCards(List<Card> cards) {
         if (cards.stream()
-                .filter(c -> c.getTypes().size() > 1)
+                .filter(c -> c.getShopCard().getTypes().size() > 1)
                 .toList()
                 .size() > 8)
             throw new DeckCardValidationException("More than 8 cards with multiple types");
     }
 
     private void validateSameCardsSubtype(List<Card> cards) {
-        Map<CardSubtypeEnum, Long> typeCounts = cards.stream()
-                .flatMap(card -> card.getSubtypes().stream())
-                .collect(Collectors.groupingBy(CardSubtype::getSubtype, Collectors.counting()));
-
-        typeCounts.forEach((type, count) -> {
-            if (count > 4) {
-                throw new DeckCardValidationException("More than 4 cards from the subtype: " + type.name());
-            }
-        });
+//        Map<CardSubtypeEnum, Long> typeCounts = cards.stream()
+//                .flatMap(card -> card.getShopCard().getSubtypes().stream())
+//                .collect(Collectors.groupingBy(CardSubtype::getSubtype, Collectors.counting()));
+//
+//        typeCounts.forEach((type, count) -> {
+//            if (count > 4) {
+//                throw new DeckCardValidationException("More than 4 cards from the subtype: " + type.name());
+//            }
+//        });
     }
 
     private void validateLegendRarity(List<Card> cards) {
         if (cards.stream()
-                .filter(c -> c.getRarity().equals(CardRarityEnum.LEGEND))
+                .filter(c -> c.getShopCard().getRarity().equals(CardRarityEnum.LEGEND))
                 .toList()
                 .size() > 3)
             throw new DeckCardValidationException("More than 3 legend rarity cards");
@@ -141,7 +141,7 @@ public class DeckCardService {
 
     private void validateSameRarityCards(List<Card> cards) {
         Map<CardRarityEnum, List<Card>> cardsByRarity = cards.stream()
-                .collect(Collectors.groupingBy(Card::getRarity));
+                .collect(Collectors.groupingBy(c -> c.getShopCard().getRarity()));
 
         for (CardRarityEnum rarity : cardsByRarity.keySet()) {
             if (cardsByRarity.get(rarity).size() > 8)
