@@ -16,6 +16,7 @@ services:
       - pokermon_network
 
   redis:
+    container_name: redis_cache
     image: redis:alpine
     ports:
       - "6379:6379"
