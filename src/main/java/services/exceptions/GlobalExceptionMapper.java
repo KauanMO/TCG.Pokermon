@@ -55,6 +55,22 @@ public class GlobalExceptionMapper {
     }
 
     @ServerExceptionMapper
+    public Response exception(UsernameAlreadyTakenException e) {
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(EmailAlreadyTakenException e) {
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
     public Response exception(DuplicatedUniqueEntityException e) {
         return Response
                 .status(Response.Status.CONFLICT)

@@ -11,4 +11,8 @@ public class UserRepository implements PanacheRepository<User> {
     public Optional<User> findByEmail(String email) {
         return this.find("email = ?1", email).stream().findFirst();
     }
+
+    public Optional<User> findByUsername(String username) {
+        return this.find("username = ?1", username).stream().findFirst();
+    }
 }
