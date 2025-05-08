@@ -4,6 +4,7 @@ import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -34,7 +35,7 @@ public class UserResource {
 
     @POST
     @PermitAll
-    public Response createUser(CreateUserDTO dto) {
+    public Response createUser(@Valid CreateUserDTO dto) {
         var newUser = service.registerUser(dto);
 
         return Response
@@ -45,7 +46,7 @@ public class UserResource {
     @POST
     @Path("login")
     @PermitAll
-    public Response login(LoginDTO dto) {
+    public Response login(@Valid LoginDTO dto) {
         var userFound = service.login(dto);
         String token = tokenService.generateToken(userFound);
 
