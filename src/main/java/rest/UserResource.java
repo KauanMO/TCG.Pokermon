@@ -35,6 +35,7 @@ public class UserResource {
     @POST
     @PermitAll
     public Response createUser(CreateUserDTO dto) {
+        System.out.println(dto);
         var newUser = service.registerUser(dto);
 
         return Response
