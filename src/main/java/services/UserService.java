@@ -7,6 +7,7 @@ import models.User;
 import repositories.UserRepository;
 import rest.dtos.user.CreateUserDTO;
 import rest.dtos.user.LoginDTO;
+import services.exceptions.EmailAlreadyTakenException;
 import services.exceptions.IncorrectPasswordException;
 import services.exceptions.UserNotFoundException;
 import services.exceptions.UsernameAlreadyTakenException;
@@ -23,6 +24,7 @@ public class UserService {
     @Transactional
     public User registerUser(CreateUserDTO dto) {
         if (findByUsername(dto.username()).isPresent()) throw new UsernameAlreadyTakenException(dto.username());
+        if (findByEmail(dto.email()).isPresent()) throw new EmailAlreadyTakenException(dto.email());
 
         User newUser = User.builder()
                 .username(dto.username())
@@ -64,6 +66,10 @@ public class UserService {
 
     public Optional<User> findByUsername(String username) {
         return repository.findByUsername(username);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return repository.findByEmail(email);
     }
 
     @Transactional
