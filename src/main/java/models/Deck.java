@@ -22,7 +22,6 @@ public class Deck {
 
     public String name;
     public LocalDate createdDate;
-    public Integer postition;
     public Boolean active;
 
     @ManyToOne

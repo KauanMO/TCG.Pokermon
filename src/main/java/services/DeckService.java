@@ -3,6 +3,7 @@ package services;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import models.Deck;
 import models.User;
 import repositories.DeckRepository;
@@ -25,7 +26,6 @@ public class DeckService {
 
         Deck newDeck = Deck.builder()
                 .user(userFound)
-                .postition(dto.position())
                 .name(dto.name())
                 .build();
 
