@@ -1,6 +1,7 @@
 package rest;
 
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
@@ -14,7 +15,7 @@ public class DeckCardResource {
 
     @POST
     @Path("{userId}")
-    public Response createDeckCards(CreateDeckCardDTO dto) {
+    public Response createDeckCards(@Valid CreateDeckCardDTO dto) {
         var validatedCards = service.createDeckCards(dto);
 
         return Response

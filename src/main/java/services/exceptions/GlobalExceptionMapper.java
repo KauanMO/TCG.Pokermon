@@ -1,7 +1,10 @@
 package services.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -67,6 +70,17 @@ public class GlobalExceptionMapper {
         return Response
                 .status(Response.Status.BAD_REQUEST)
                 .entity(e.getMessage())
+                .build();
+    }
+
+    @ServerExceptionMapper
+    public Response exception(ConstraintViolationException e) {
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(e.getConstraintViolations()
+                        .stream()
+                        .map(ConstraintViolation::getMessageTemplate)
+                        .toList())
                 .build();
     }
 
