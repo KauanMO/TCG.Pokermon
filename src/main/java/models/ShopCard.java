@@ -32,9 +32,9 @@ public class ShopCard {
 
     public Double averagePrice;
 
-    public List<CardTypeEnum> types = new ArrayList<>();
+    public final List<CardTypeEnum> types = new ArrayList<>();
 
-    public List<CardSubtypeEnum> subtypes = new ArrayList<>();
+    public final List<CardSubtypeEnum> subtypes = new ArrayList<>();
 
     @OneToMany(mappedBy = "shopCard")
     public List<Card> acquiredCards;

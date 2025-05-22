@@ -5,10 +5,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
@@ -26,12 +23,8 @@ import java.util.List;
 public class UserResource {
     @Inject
     private UserService service;
-
     @Inject
-    TokenService tokenService;
-
-    @Inject
-    JsonWebToken jwt;
+    private TokenService tokenService;
 
     @POST
     @PermitAll
@@ -74,6 +67,17 @@ public class UserResource {
 
         return Response
                 .ok(new UserInfoDTO(userFound))
+                .build();
+    }
+
+    @PATCH
+    @Authenticated
+    @Path("pokemon-favorite-code")
+    public Response updateFavoritePokemonCode(@QueryParam("pokemonCode") Integer pokemonCode) {
+        service.updateUserFavoritePokemonCode(pokemonCode);
+
+        return Response
+                .ok()
                 .build();
     }
 }

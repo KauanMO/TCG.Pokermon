@@ -31,7 +31,7 @@ public class Card {
     public ShopCard shopCard;
 
     @OneToMany(mappedBy = "card")
-    public List<DeckCard> decks = new ArrayList<>();
+    public final List<DeckCard> decks = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

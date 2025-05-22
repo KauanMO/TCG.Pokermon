@@ -28,7 +28,7 @@ public class Deck {
     public User user;
 
     @OneToMany(mappedBy = "deck")
-    public List<DeckCard> cards = new ArrayList<>();
+    public final List<DeckCard> cards = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
