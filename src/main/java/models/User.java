@@ -28,12 +28,13 @@ public class User {
     public LocalDate createdDate;
     public Double balance;
     public Integer role;
+    public Integer favoritePokemonCode;
 
     @OneToMany(mappedBy = "user")
-    public List<Card> cards = new ArrayList<>();
+    public final List<Card> cards = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    public List<Deck> decks = new ArrayList<>();
+    public final List<Deck> decks = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

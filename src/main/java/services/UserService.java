@@ -78,4 +78,15 @@ public class UserService {
 
         repository.persist(user);
     }
+
+    @Transactional
+    public void updateUserFavoritePokemonCode(Integer pokemonCode) {
+        User userFound = repository.findById(tokenService.getUserId());
+
+        System.out.println(tokenService.getUserId());
+        System.out.println(userFound);
+
+        userFound.setFavoritePokemonCode(pokemonCode);
+        repository.persist(userFound);
+    }
 }

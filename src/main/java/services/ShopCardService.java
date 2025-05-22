@@ -30,7 +30,7 @@ public class ShopCardService {
         List<ShopCard> shopCards = new ArrayList<>();
 
         for (ExternalCardDTO card : cards) {
-            shopCards.add(ShopCard.builder()
+            ShopCard shopCard = ShopCard.builder()
                     .descripton(card.flavorText())
                     .evolvesFrom(card.evolvesFrom())
                     .largeImage(card.images().large())
@@ -40,15 +40,19 @@ public class ShopCardService {
                     .averagePrice(card.cardmarket().prices().averageSellPrice())
                     .name(card.name())
                     .cardSet(cardSet)
-                    .types(card
-                            .types().stream()
-                            .map(c -> CardTypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
-                            .toList())
-                    .subtypes(card
-                            .subtypes().stream()
-                            .map(c -> CardSubtypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
-                            .toList())
-                    .build());
+                    .build();
+
+            shopCard.getTypes().addAll(card
+                    .types().stream()
+                    .map(c -> CardTypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
+                    .toList());
+
+            shopCard.getSubtypes().addAll(card
+                    .subtypes().stream()
+                    .map(c -> CardSubtypeEnum.valueOf(StringHelper.enumStringBuilder(c)))
+                    .toList());
+
+            shopCards.add(shopCard);
         }
 
         repository.persist(shopCards);
