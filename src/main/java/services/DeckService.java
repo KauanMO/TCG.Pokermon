@@ -11,6 +11,8 @@ import rest.dtos.deck.CreateDeckDTO;
 import services.exceptions.DeckNotFoundException;
 import services.exceptions.UserNotFoundException;
 
+import java.util.List;
+
 @ApplicationScoped
 public class DeckService {
     @Inject
@@ -40,6 +42,10 @@ public class DeckService {
         if (deckFound == null) throw new DeckNotFoundException(id);
 
         return deckFound;
+    }
+
+    public List<Deck> findByUserId(Long userId) {
+        return repository.findByUserId(userId);
     }
 
     public Deck findByIdUserId(Long id, Long userId) {

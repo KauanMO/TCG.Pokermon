@@ -2,13 +2,17 @@ package rest;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import models.Deck;
 import rest.dtos.deck.CreateDeckDTO;
 import rest.dtos.deck.OutDeckDTO;
 import services.DeckService;
+
+import java.util.List;
 
 @Path("decks")
 public class DeckResource {
@@ -21,6 +25,16 @@ public class DeckResource {
 
         return Response
                 .ok(new OutDeckDTO(newDeck))
+                .build();
+    }
+
+    @GET
+    public Response getUserDecks(@QueryParam("userId") Long userId) {
+        List<Deck> userDecks = service.findByUserId(userId);
+
+        return Response
+                .ok(userDecks.stream()
+                        .map(OutDeckDTO::new))
                 .build();
     }
 }

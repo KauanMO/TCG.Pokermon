@@ -22,7 +22,7 @@ services:
       - pokermon_network
 
   quarkus:
-    image: kauanmatheusoliveira/pokermon:0.5.0
+    image: kauanmatheusoliveira/pokermon:0.6.0
 #    build:
 #      context: .
 #      dockerfile: ./src/main/docker/Dockerfile.jvm
