@@ -6,13 +6,14 @@ public record OutUserDTO(
         Long id,
         String username,
         String email,
-        String token
+        String token,
+        Integer favoritePokemonCode
 ) {
     public OutUserDTO(User u) {
-        this(u.getId(), u.getUsername(), u.getEmail(), null);
+        this(u.getId(), u.getUsername(), u.getEmail(), null, u.getFavoritePokemonCode());
     }
 
     public OutUserDTO(User u, String token) {
-        this(u.getId(), u.getUsername(), u.getEmail(), token);
+        this(u.getId(), u.getUsername(), u.getEmail(), token, u.getFavoritePokemonCode());
     }
 }
