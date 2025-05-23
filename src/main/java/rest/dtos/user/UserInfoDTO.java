@@ -9,9 +9,10 @@ public record UserInfoDTO(
         LocalDate createdDate,
         Double balance,
         Integer cardAmount,
-        Integer deckAmount
+        Integer deckAmount,
+        Integer favoritePokemonCode
 ) {
     public UserInfoDTO(User u) {
-        this(u.getUsername(), u.getCreatedDate(), u.getBalance(), u.getCards().size(), u.getDecks().size());
+        this(u.getUsername(), u.getCreatedDate(), u.getBalance(), u.getCards().size(), u.getDecks().size(), u.getFavoritePokemonCode());
     }
 }
