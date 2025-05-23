@@ -72,7 +72,7 @@ public class UserResource {
 
     @PATCH
     @Authenticated
-    @Path("pokemon-favorite-code")
+    @Path("favorite-pokemon-code")
     public Response updateFavoritePokemonCode(@QueryParam("pokemonCode") Integer pokemonCode) {
         service.updateUserFavoritePokemonCode(pokemonCode);
 
