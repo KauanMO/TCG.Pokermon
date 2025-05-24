@@ -25,6 +25,7 @@ public enum CardRarityEnum {
     RARE_PRISM_STAR(1),
     LEGEND(1),
     PROMO(5),
+    TRAINER_GALLERY_RARE_HOLO(1),
     AMAZING_RARE(3);
 
     private final int weight;

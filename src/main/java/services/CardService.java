@@ -1,5 +1,6 @@
 package services;
 
+import enums.CardTypeEnum;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -27,9 +28,8 @@ public class CardService {
     private UserService userService;
     @Inject
     private ShopCardService shopCardService;
-
     @Inject
-    TokenService tokenService;
+    private TokenService tokenService;
 
     private final String defaultSelectFilds = "id,name,images,rarity,set,cardmarket,subtypes,types,flavorText,evolvesFrom";
 
@@ -101,7 +101,22 @@ public class CardService {
         return repository.findByUserId(userId);
     }
 
-    public List<Card> findMyCards() {
+    public List<Card> findByUserIdOrderByCardType(Long userId, String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
+        return repository.findByUserIdOrderByCardType(userId, orderBy, asc, cardTypes, page, pageSize);
+    }
+
+    public List<Card> findByUserIdOrderBy(Long userId, String orderBy, Boolean asc, Integer page, Integer pageSize) {
+        return repository.findByUserIdOrderBy(userId, orderBy, asc, page, pageSize);
+    }
+
+    public List<Card> findMyCards(String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
+        if (orderBy != null) {
+            if (cardTypes != null && !cardTypes.isEmpty())
+                return this.findByUserIdOrderByCardType(tokenService.getUserId(), orderBy, asc, cardTypes, page, pageSize);
+
+            return this.findByUserIdOrderBy(tokenService.getUserId(), orderBy, asc, page, pageSize);
+        }
+
         return this.findByUserId(tokenService.getUserId());
     }
 

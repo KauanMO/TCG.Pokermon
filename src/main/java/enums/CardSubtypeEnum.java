@@ -22,5 +22,7 @@ public enum CardSubtypeEnum {
     SUPPORTER,
     TAG_TEAM,
     V,
-    VMAX
+    VMAX,
+    ETERNAMAX,
+    FUSION_STRIKE
 }
