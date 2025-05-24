@@ -1,5 +1,6 @@
 package rest;
 
+import enums.CardTypeEnum;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -45,8 +46,12 @@ public class CardResource {
 
     @GET
     @Path("my-cards")
-    public Response getMyCards() {
-        var cards = service.findMyCards();
+    public Response getMyCards(@QueryParam("orderBy") String orderBy,
+                               @QueryParam("asc") Boolean asc,
+                               @QueryParam("cardTypes") List<CardTypeEnum> cardTypes,
+                               @QueryParam("page") Integer page,
+                               @QueryParam("pageSize") Integer pageSize) {
+        var cards = service.findMyCards(orderBy, asc, cardTypes, page, pageSize);
 
         return Response.
                 ok(cards.stream()

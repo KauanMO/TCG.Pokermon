@@ -52,7 +52,7 @@ public class CardSetService {
                 .findFirst()
                 .orElseThrow(() -> new ExternalContentNotFoundException("Cardset"));
 
-        ExternalCardResponseDTO externalResponse = cardsRestClient.get("set.id:" + dto.externalId(),
+        ExternalCardResponseDTO externalResponse = cardsRestClient.get("supertype:pokemon set.id:" + dto.externalId(),
                 "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,cardmarket");
 
         List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse.data());

@@ -8,6 +8,8 @@ import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
+import java.util.Arrays;
+
 public class GlobalExceptionMapper {
     @ServerExceptionMapper
     public Response exception(DeckNotFoundException e) {
@@ -118,7 +120,9 @@ public class GlobalExceptionMapper {
 
     @ServerExceptionMapper
     public Response exception(Exception e) {
-        System.out.println(e.getMessage());
+        System.out.println("Exception: " + e.getClass());
+        System.out.println("Message: " + e.getMessage());
+        System.out.println("Stack: " + Arrays.toString(e.getStackTrace()));
 
         return Response
                 .status(500)
