@@ -23,9 +23,11 @@ import services.exceptions.CardSetNotFoundException;
 import services.exceptions.DuplicatedUniqueEntityException;
 import services.exceptions.ExternalContentNotFoundException;
 import services.exceptions.NoBalanceEnoughException;
+import utils.CardHelper;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class CardSetService {
@@ -53,7 +55,7 @@ public class CardSetService {
                 .orElseThrow(() -> new ExternalContentNotFoundException("Cardset"));
 
         ExternalCardResponseDTO externalResponse = cardsRestClient.get("supertype:pokemon set.id:" + dto.externalId(),
-                "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,cardmarket");
+                "id,name,rarity,flavorText,types,subtypes,evolvesFrom,images,cardmarket,tcgplayer");
 
         List<OutCardDTO> orderedCards = orderCardsByPriceDesc(externalResponse.data());
 
@@ -86,11 +88,11 @@ public class CardSetService {
 
     public List<OutCardDTO> orderCardsByPriceDesc(Set<ExternalCardDTO> cards) {
         return cards.stream()
-                .sorted(Comparator.comparingDouble((ExternalCardDTO c) -> c.cardmarket().prices().averageSellPrice())
-                        .reversed())
-                .map(OutCardDTO::new)
+                .sorted(Comparator.comparingDouble(CardHelper::getCardPrice).reversed())
+                .map(c -> new OutCardDTO(c, CardHelper.getCardPrice(c)))
                 .toList();
     }
+
 
     public Set<CardSet> findCardSets() {
         return repository
