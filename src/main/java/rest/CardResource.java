@@ -8,6 +8,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import models.Card;
+import rest.dtos.card.MyCardsDTO;
 import rest.dtos.card.OpenedCardDTO;
 import rest.dtos.card.OutCardDTO;
 import services.CardService;
@@ -51,12 +52,18 @@ public class CardResource {
                                @QueryParam("cardTypes") List<CardTypeEnum> cardTypes,
                                @QueryParam("page") Integer page,
                                @QueryParam("pageSize") Integer pageSize) {
-        var cards = service.findMyCards(orderBy, asc, cardTypes, page, pageSize);
+        var cardsFound = service.findMyCards(orderBy == null ? "createdDate" : orderBy,
+                asc != null && asc,
+                cardTypes,
+                page,
+                pageSize);
+
+        var cardsDTO = cardsFound.cards().stream()
+                .map(OutCardDTO::new)
+                .toList();
 
         return Response.
-                ok(cards.stream()
-                        .map(OutCardDTO::new)
-                        .toList())
+                ok(new MyCardsDTO(cardsDTO, cardsFound.totalCards()))
                 .build();
     }
 }
