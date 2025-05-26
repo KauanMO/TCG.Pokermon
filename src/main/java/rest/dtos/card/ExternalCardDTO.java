@@ -14,9 +14,30 @@ public record ExternalCardDTO(
     String evolvesFrom,
     ExternalCardImagesDTO images,
     ExternalSetDTO set,
-    CardMarket cardmarket
+    CardMarket cardmarket,
+    TcgPlayer tcgplayer
 ) {
-    public record CardMarket (Prices prices) { }
+    public record CardMarket (CardMarketPrices prices) { }
+    public record TcgPlayer (TcgPlayerPrices prices) {}
 
-    public record Prices(Double averageSellPrice) { }
+    public record CardMarketPrices(Double averageSellPrice) { }
+    public record TcgPlayerPrices(TcgPlayerNormalPrice normal,
+                                  TcgPlayerHolofoilPrice holofoil,
+                                  TcgPlayerReverseHolofoilPrice reverseHolofoil) {}
+
+    public record TcgPlayerNormalPrice(Double low,
+                                       Double mid,
+                                       Double high,
+                                       Double market,
+                                       Double directLow) {}
+    public record TcgPlayerHolofoilPrice(Double low,
+                                       Double mid,
+                                       Double high,
+                                       Double market,
+                                       Double directLow) {}
+    public record TcgPlayerReverseHolofoilPrice(Double low,
+                                         Double mid,
+                                         Double high,
+                                         Double market,
+                                         Double directLow) {}
 }

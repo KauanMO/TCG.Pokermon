@@ -21,7 +21,7 @@ public record OutCardDTO(
         ExternalCardImagesDTO images,
         Double price
 ) {
-    public OutCardDTO(ExternalCardDTO c) {
+    public OutCardDTO(ExternalCardDTO c, Double price) {
         this(
                 null,
                 null,
@@ -33,9 +33,7 @@ public record OutCardDTO(
                 c.subtypes(),
                 c.evolvesFrom(),
                 c.images(),
-                c.cardmarket()
-                        .prices()
-                        .averageSellPrice());
+                price);
     }
 
     public OutCardDTO(Card c) {

@@ -24,5 +24,8 @@ public enum CardSubtypeEnum {
     V,
     VMAX,
     ETERNAMAX,
-    FUSION_STRIKE
+    FUSION_STRIKE,
+    TERA,
+    FUTURE,
+    ANCIENT
 }

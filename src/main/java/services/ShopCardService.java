@@ -12,6 +12,7 @@ import models.ShopCard;
 import repositories.ShopCardRepository;
 import rest.dtos.card.ExternalCardDTO;
 import services.exceptions.NoneShopCardFoundException;
+import utils.CardHelper;
 import utils.CardRarityPicker;
 import utils.StringHelper;
 
@@ -37,7 +38,7 @@ public class ShopCardService {
                     .smallImage(card.images().small())
                     .externalCode(card.id())
                     .rarity(CardRarityEnum.valueOf(StringHelper.enumStringBuilder(card.rarity())))
-                    .averagePrice(card.cardmarket().prices().averageSellPrice())
+                    .averagePrice(CardHelper.getCardPrice(card))
                     .name(card.name())
                     .cardSet(cardSet)
                     .build();
