@@ -5,10 +5,12 @@ import enums.CardTypeEnum;
 import models.Card;
 import models.ShopCard;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record OutCardDTO(
         Long id,
+        LocalDate createdDate,
         String name,
         String externalCode,
         String rarity,
@@ -21,6 +23,7 @@ public record OutCardDTO(
 ) {
     public OutCardDTO(ExternalCardDTO c) {
         this(
+                null,
                 null,
                 c.name(),
                 c.id(),
@@ -38,6 +41,7 @@ public record OutCardDTO(
     public OutCardDTO(Card c) {
         this(
                 c.getId(),
+                c.getCreatedDate(),
                 c.getShopCard().getName(),
                 c.getShopCard().getExternalCode(),
                 c.getShopCard().getRarity().name(),
@@ -53,6 +57,7 @@ public record OutCardDTO(
     public OutCardDTO(ShopCard sc) {
         this(
                 sc.getId(),
+                null,
                 sc.getName(),
                 sc.getExternalCode(),
                 sc.getRarity().name(),

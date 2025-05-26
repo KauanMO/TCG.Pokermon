@@ -10,7 +10,9 @@ import repositories.CardRepository;
 import rest.clients.CardsRestClient;
 import rest.dtos.card.ExternalCardDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
+import services.dtos.MyCardsDTO;
 import services.exceptions.CardNotFoundException;
+import services.exceptions.PageableOnlyOperationException;
 import services.exceptions.UserNotFoundException;
 import utils.CardRarityPicker;
 
@@ -101,23 +103,21 @@ public class CardService {
         return repository.findByUserId(userId);
     }
 
-    public List<Card> findByUserIdOrderByCardType(Long userId, String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
+    public MyCardsDTO findByUserIdOrderByCardType(Long userId, String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
         return repository.findByUserIdOrderByCardType(userId, orderBy, asc, cardTypes, page, pageSize);
     }
 
-    public List<Card> findByUserIdOrderBy(Long userId, String orderBy, Boolean asc, Integer page, Integer pageSize) {
+    public MyCardsDTO findByUserIdOrderBy(Long userId, String orderBy, Boolean asc, Integer page, Integer pageSize) {
         return repository.findByUserIdOrderBy(userId, orderBy, asc, page, pageSize);
     }
 
-    public List<Card> findMyCards(String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
-        if (orderBy != null) {
-            if (cardTypes != null && !cardTypes.isEmpty())
-                return this.findByUserIdOrderByCardType(tokenService.getUserId(), orderBy, asc, cardTypes, page, pageSize);
+    public MyCardsDTO findMyCards(String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
+        if (page == null || pageSize == null) throw new PageableOnlyOperationException();
 
-            return this.findByUserIdOrderBy(tokenService.getUserId(), orderBy, asc, page, pageSize);
-        }
+        if (cardTypes != null && !cardTypes.isEmpty())
+            return this.findByUserIdOrderByCardType(tokenService.getUserId(), orderBy, asc, cardTypes, page, pageSize);
 
-        return this.findByUserId(tokenService.getUserId());
+        return this.findByUserIdOrderBy(tokenService.getUserId(), orderBy, asc, page, pageSize);
     }
 
     public Card findCardById(Long id) {

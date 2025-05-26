@@ -6,6 +6,7 @@ import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import models.Card;
+import services.dtos.MyCardsDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -16,17 +17,17 @@ public class CardRepository implements PanacheRepository<Card> {
         return this.list("user.id = ?1", userId);
     }
 
-    public List<Card> findByUserIdOrderBy(Long userId, String orderBy, Boolean asc, Integer page, Integer pageSize) {
+    public MyCardsDTO findByUserIdOrderBy(Long userId, String orderBy, Boolean asc, Integer page, Integer pageSize) {
         String order = (asc == null || asc) ? "asc" : "desc";
 
         var cards = this.find("user.id = ?1 order by " + orderBy + " " + order, userId);
 
         cards.page(page, pageSize);
 
-        return cards.list();
+        return new MyCardsDTO(cards.list(), (int) cards.count());
     }
 
-    public List<Card> findByUserIdOrderByCardType(Long userId, String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
+    public MyCardsDTO findByUserIdOrderByCardType(Long userId, String orderBy, Boolean asc, List<CardTypeEnum> cardTypes, Integer page, Integer pageSize) {
         String order = (asc == null || asc) ? "asc" : "desc";
 
         var cards = this.find("user.id = ?1 and shopCard.types in (?2) order by " + orderBy + " " + order,
@@ -35,6 +36,6 @@ public class CardRepository implements PanacheRepository<Card> {
 
         cards.page(page, pageSize);
 
-        return cards.list();
+        return new MyCardsDTO(cards.list(), (int) cards.count());
     }
 }
