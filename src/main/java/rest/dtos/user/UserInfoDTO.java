@@ -1,6 +1,7 @@
 package rest.dtos.user;
 
 import models.User;
+import utils.StringHelper;
 
 import java.time.LocalDate;
 
@@ -10,9 +11,16 @@ public record UserInfoDTO(
         Double balance,
         Integer cardAmount,
         Integer deckAmount,
-        Integer favoritePokemonCode
+        Integer favoritePokemonCode,
+        String hashedEmail
 ) {
     public UserInfoDTO(User u) {
-        this(u.getUsername(), u.getCreatedDate(), u.getBalance(), u.getCards().size(), u.getDecks().size(), u.getFavoritePokemonCode());
+        this(u.getUsername(),
+                u.getCreatedDate(),
+                u.getBalance(),
+                u.getCards().size(),
+                u.getDecks().size(),
+                u.getFavoritePokemonCode(),
+                StringHelper.hashEmail(u.getEmail()));
     }
 }
