@@ -48,6 +48,9 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
+      - name: Create META-INF/resources directory
+        run: mkdir -p /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources
+
       - name: Create publicKey.pem file
         run: |
           cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/publicKey.pem
