@@ -1,4 +1,4 @@
-name: Build and Deploy (Self-Hosted)
+name: Build and Deploy (Split)
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -37,6 +37,11 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/pokermon:latest
 
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
       - name: Pull and restart container
         run: |
           cd /home/ubuntu/TCG.Pokermon
