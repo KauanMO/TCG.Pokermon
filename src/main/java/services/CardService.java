@@ -9,6 +9,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import repositories.CardRepository;
 import rest.clients.CardsRestClient;
 import rest.dtos.card.ExternalCardDTO;
+import rest.dtos.card.ShopCardCountDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
 import services.dtos.MyCardsDTO;
 import services.exceptions.CardNotFoundException;
@@ -118,6 +119,10 @@ public class CardService {
             return this.findByUserIdOrderByCardType(tokenService.getUserId(), orderBy, asc, cardTypes, page, pageSize);
 
         return this.findByUserIdOrderBy(tokenService.getUserId(), orderBy, asc, page, pageSize);
+    }
+
+    public List<ShopCardCountDTO> getCardsObtainedByCardSet(Long cardSetId) {
+        return repository.countCardsByUserAndCardSet(tokenService.getUserId(), cardSetId);
     }
 
     public Card findCardById(Long id) {
