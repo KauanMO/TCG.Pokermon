@@ -13,6 +13,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create META-INF/resources directory
+        run: mkdir -p /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources
+
+      - name: Create publicKey.pem file
+        run: |
+          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/publicKey.pem
+          ${{ secrets.JWT_PUBLIC_KEY }}
+          EOF
+
+      - name: Create privateKey.pem file
+        run: |
+          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/privateKey.pem
+          ${{ secrets.JWT_PRIVATE_KEY }}
+          EOF
+
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -46,21 +61,6 @@ jobs:
         run: |
           cat <<EOF > /home/ubuntu/TCG.Pokermon/.env
           ${{ secrets.ENV_FILE }}
-          EOF
-
-      - name: Create META-INF/resources directory
-        run: mkdir -p /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources
-
-      - name: Create publicKey.pem file
-        run: |
-          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/publicKey.pem
-          ${{ secrets.JWT_PUBLIC_KEY }}
-          EOF
-
-      - name: Create privateKey.pem file
-        run: |
-          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/privateKey.pem
-          ${{ secrets.JWT_PRIVATE_KEY }}
           EOF
 
       - name: Pull and restart container
