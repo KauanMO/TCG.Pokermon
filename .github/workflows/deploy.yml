@@ -14,17 +14,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create META-INF/resources directory
-        run: mkdir -p /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources
+        run: mkdir -p src/main/resources/META-INF/resources
 
       - name: Create publicKey.pem file
         run: |
-          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/publicKey.pem
+          cat <<EOF > src/main/resources/META-INF/resources/publicKey.pem
           ${{ secrets.JWT_PUBLIC_KEY }}
           EOF
 
       - name: Create privateKey.pem file
         run: |
-          cat <<EOF > /home/ubuntu/TCG.Pokermon/src/main/resources/META-INF/resources/privateKey.pem
+          cat <<EOF > src/main/resources/META-INF/resources/privateKey.pem
           ${{ secrets.JWT_PRIVATE_KEY }}
           EOF
 
