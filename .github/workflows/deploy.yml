@@ -36,6 +36,6 @@ jobs:
 
       - name: Pull and restart container
         run: |
-          cd TCG.Pokermon
+          cd /home/ubuntu/TCG.Pokermon
           docker-compose pull
           docker-compose up -d
