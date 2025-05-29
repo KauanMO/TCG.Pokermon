@@ -66,4 +66,14 @@ public class CardResource {
                 ok(new MyCardsDTO(cardsDTO, cardsFound.totalCards()))
                 .build();
     }
+
+    @GET
+    @Path("cards-obtained-set")
+    public Response getCardsObtainedByCardSet(@QueryParam("cardSetId") Long cardSetId) {
+        var cardsCount = service.getCardsObtainedByCardSet(cardSetId);
+
+        return Response
+                .ok(cardsCount)
+                .build();
+    }
 }

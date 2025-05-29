@@ -2,14 +2,12 @@ package repositories;
 
 import enums.CardTypeEnum;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import models.Card;
+import rest.dtos.card.ShopCardCountDTO;
 import services.dtos.MyCardsDTO;
 
 import java.util.List;
-import java.util.Map;
 
 @ApplicationScoped
 public class CardRepository implements PanacheRepository<Card> {
@@ -37,5 +35,19 @@ public class CardRepository implements PanacheRepository<Card> {
         cards.page(page, pageSize);
 
         return new MyCardsDTO(cards.list(), (int) cards.count());
+    }
+
+    public List<ShopCardCountDTO> countCardsByUserAndCardSet(Long userId, Long cardSetId) {
+        return getEntityManager()
+                .createQuery("""
+                            SELECT new rest.dtos.card.ShopCardCountDTO(sc.id, COUNT(c.id))
+                            FROM Card c
+                            JOIN c.shopCard sc
+                            WHERE c.user.id = :userId AND sc.cardSet.id = :cardSetId
+                            GROUP BY sc.id
+                        """, ShopCardCountDTO.class)
+                .setParameter("userId", userId)
+                .setParameter("cardSetId", cardSetId)
+                .getResultList();
     }
 }

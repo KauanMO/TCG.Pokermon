@@ -63,6 +63,10 @@ public class ShopCardService {
         return repository.findBySetIdOrderByAveragePrice(cardSetId, page, pageSize);
     }
 
+    public List<ShopCard> getByCardSetId(Long cardSetId) {
+        return repository.findBySetId(cardSetId);
+    }
+
     public ShopCard getRandomShopCardAndRarity(Long cardSetId) {
         CardRarityEnum rarity = CardRarityPicker.pickRarity();
 
