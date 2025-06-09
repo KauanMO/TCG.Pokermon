@@ -45,7 +45,11 @@ public class DeckService {
     }
 
     public List<Deck> findByUserId(Long userId) {
-        return repository.findByUserId(userId);
+        Long finalUserId = userId == null
+                ? tokenService.getUserId()
+                : userId;
+
+        return repository.findByUserId(finalUserId);
     }
 
     public Deck findByIdUserId(Long id, Long userId) {
