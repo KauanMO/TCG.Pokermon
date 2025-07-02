@@ -2,10 +2,7 @@ package rest;
 
 import enums.CardTypeEnum;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import models.Card;
 import rest.dtos.card.MyCardsDTO;
@@ -74,6 +71,16 @@ public class CardResource {
 
         return Response
                 .ok(cardsCount)
+                .build();
+    }
+
+    @DELETE
+    @Path("sell/{id}")
+    public Response sellCard(Long id) {
+        service.sellCard(id);
+
+        return Response
+                .noContent()
                 .build();
     }
 }
