@@ -13,6 +13,7 @@ import rest.dtos.card.ShopCardCountDTO;
 import rest.dtos.external.ExternalCardResponseDTO;
 import services.dtos.MyCardsDTO;
 import services.exceptions.CardNotFoundException;
+import services.exceptions.NotCardOwnerException;
 import services.exceptions.PageableOnlyOperationException;
 import services.exceptions.UserNotFoundException;
 import utils.CardRarityPicker;
@@ -25,6 +26,8 @@ public class CardService {
     private CardsRestClient cardsRestClient;
     @Inject
     private CardRepository repository;
+    @Inject
+    private DeckCardService deckCardService;
     @Inject
     private CardSetService cardSetService;
     @Inject
@@ -135,5 +138,20 @@ public class CardService {
 
     public List<Card> findCardsByIds(List<Long> ids) {
         return repository.list("id in ?1", ids);
+    }
+
+    @Transactional
+    public void sellCard(Long id) {
+        Card card = repository.findById(id);
+        User user = userService.findUserById(tokenService.getUserId()).orElseThrow(UserNotFoundException::new);
+
+        if (card == null) throw new CardNotFoundException(id);
+        if (card.getUser() != user) throw new NotCardOwnerException();
+
+        deckCardService.deleteDeckCardsByCardId(card.getId());
+
+        repository.delete(card);
+
+        userService.updateUserBalance(user, user.getBalance() + card.getPrice());
     }
 }
