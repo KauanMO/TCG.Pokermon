@@ -69,6 +69,11 @@ public class DeckCardService {
         repository.deleteByCardId(cardId);
     }
 
+    @Transactional
+    public void deleteDeckCardsByCardsIds(List<Long> cardsIds) {
+        repository.deleteByCardsIds(cardsIds);
+    }
+
     private List<Card> validateNewDeckCards(Deck deck, List<Long> cardsIds) {
         List<Card> cards = cardService.findCardsByIds(cardsIds);
         List<Card> newDeckCards = new ArrayList<>(cards);
