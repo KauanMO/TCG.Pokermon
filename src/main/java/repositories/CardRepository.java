@@ -50,4 +50,8 @@ public class CardRepository implements PanacheRepository<Card> {
                 .setParameter("cardSetId", cardSetId)
                 .getResultList();
     }
+
+    public void deleteCardsByIds(List<Long> ids) {
+        this.delete("id in ?1", ids);
+    }
 }

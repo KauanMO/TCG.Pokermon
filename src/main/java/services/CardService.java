@@ -141,17 +141,42 @@ public class CardService {
     }
 
     @Transactional
-    public void sellCard(Long id) {
-        Card card = repository.findById(id);
+    public Map<Long, String> sellCards(List<Long> ids) {
+        List<Card> cards = findCardsByIds(ids);
         User user = userService.findUserById(tokenService.getUserId()).orElseThrow(UserNotFoundException::new);
 
-        if (card == null) throw new CardNotFoundException(id);
-        if (card.getUser() != user) throw new NotCardOwnerException();
+        Map<Long, String> invalidCardsIds = new HashMap<>();
+        List<Card> validCards = new ArrayList<>();
 
-        deckCardService.deleteDeckCardsByCardId(card.getId());
+        for (Long id : ids) {
+            Optional<Card> card = cards.stream().filter(c -> c.getId().equals(id)).findFirst();
 
-        repository.delete(card);
+            if (card.isEmpty()) {
+                invalidCardsIds.put(id, "Card not found with id " + id);
+                continue;
+            }
 
-        userService.updateUserBalance(user, user.getBalance() + card.getPrice());
+            if (!card.get().getUser().getId().equals(user.getId())) {
+                invalidCardsIds.put(id, "You are not the owner of the card with id " + id);
+                continue;
+            }
+
+            validCards.add(card.get());
+        }
+
+        deckCardService.deleteDeckCardsByCardsIds(validCards.stream()
+                .map(Card::getId)
+                .toList());
+
+        repository.deleteCardsByIds(validCards.stream()
+                .map(Card::getId)
+                .toList());
+
+        userService.updateUserBalance(user, user.getBalance() + validCards.stream()
+                .map(Card::getPrice)
+                .mapToDouble(Double::doubleValue)
+                .sum());
+
+        return invalidCardsIds;
     }
 }

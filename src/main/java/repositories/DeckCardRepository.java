@@ -13,4 +13,8 @@ public class DeckCardRepository implements PanacheRepository<DeckCard> {
     public void deleteByCardId(Long cardId) {
         this.delete("card.id = ?1", cardId);
     }
+
+    public void deleteByCardsIds(List<Long> cardId) {
+        this.delete("card.id in ?1", cardId);
+    }
 }

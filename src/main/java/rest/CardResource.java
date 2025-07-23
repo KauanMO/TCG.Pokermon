@@ -11,6 +11,7 @@ import rest.dtos.card.OutCardDTO;
 import services.CardService;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("cards")
 public class CardResource {
@@ -75,12 +76,14 @@ public class CardResource {
     }
 
     @DELETE
-    @Path("sell/{id}")
-    public Response sellCard(Long id) {
-        service.sellCard(id);
+    @Path("sell")
+    public Response sellCard(@QueryParam("ids") List<Long> ids) {
+        Map<Long, String> invalidCards = service.sellCards(ids);
+
+        if (invalidCards.isEmpty()) return Response.noContent().build();
 
         return Response
-                .noContent()
+                .ok(invalidCards)
                 .build();
     }
 }
