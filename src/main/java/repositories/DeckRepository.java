@@ -3,6 +3,7 @@ package repositories;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import models.Deck;
+import rest.dtos.deck.DeckExtraInfoDTO;
 
 import java.util.List;
 import java.util.Optional;

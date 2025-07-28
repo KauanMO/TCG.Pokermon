@@ -9,6 +9,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import models.Deck;
 import rest.dtos.deck.CreateDeckDTO;
+import rest.dtos.deck.DeckExtraInfoDTO;
 import rest.dtos.deck.OutDeckDTO;
 import services.DeckService;
 
@@ -30,11 +31,10 @@ public class DeckResource {
 
     @GET
     public Response getUserDecks(@QueryParam("userId") Long userId) {
-        List<Deck> userDecks = service.findByUserId(userId);
+        List<DeckExtraInfoDTO> userDecks = service.findByUserId(userId);
 
         return Response
-                .ok(userDecks.stream()
-                        .map(OutDeckDTO::new))
+                .ok(userDecks)
                 .build();
     }
 }
